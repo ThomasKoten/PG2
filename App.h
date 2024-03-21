@@ -25,6 +25,7 @@
 #include "Model.h"
 #include "Mesh.h"
 #include "gl_err_callback.h"
+#include "Window.h"
 
 class App
 {
@@ -39,37 +40,13 @@ public:
 	void init_assets();
 	bool init(void);
 	int run(void);
-	bool getVSyncState() const {
-		return VSyncOn;
-	}
-	void setVSyncState(bool state) {
-		VSyncOn = state;
-	}
-
-	GLFWmonitor* getMonitor() {
-		return monitor;
-	}
-	const GLFWvidmode* getMode() {
-		return mode;
-	}
 	
-	
-	bool isFullscreen() {
-		return glfwGetWindowMonitor(window) != nullptr;
-	}
 	~App();
 
 private:
-	static void error_callback(int error, const char* description);
-	static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-	static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-	bool VSyncOn = false;
+	Window* window;
 
 	std::unordered_map<std::string, Model> scene;
 	ShaderProgram shader;
-
-	GLFWmonitor* monitor;
-	const GLFWvidmode* mode;
-	GLFWwindow* window = nullptr;
 };
 

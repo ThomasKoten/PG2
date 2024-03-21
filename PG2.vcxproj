@@ -161,6 +161,7 @@
     <ClCompile Include="PG2.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="Vertex.cpp" />
+    <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -171,6 +172,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="Vertex.h" />
+    <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="PG2.rc" />
