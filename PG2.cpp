@@ -1,6 +1,6 @@
 ﻿// PG2.cpp : Tento soubor obsahuje funkci main. Provádění programu se tam zahajuje a ukončuje.
 //
-
+#pragma once
 #include <iostream>
 #include <chrono>
 #include <stack>
@@ -46,4 +46,4 @@ int main()
 {
 	if (app.init())
 		return app.run();
- }
+}

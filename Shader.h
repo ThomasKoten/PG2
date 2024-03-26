@@ -7,12 +7,13 @@
 #include <glm/ext.hpp>
 #include <GL/glew.h> 
 
-
-class ShaderProgram {
+#define  VS_PATH std::filesystem::path("./resources/shaders/basic.vert")
+#define FS_PATH std::filesystem::path("./resources/shaders/basic.frag")
+class Shader {
 public:
 	// you can add more constructors for pipeline with GS, TS etc.
-	ShaderProgram(void) = default; //does nothing
-	ShaderProgram(const std::filesystem::path& VS_file, const std::filesystem::path& FS_file);
+	Shader(void) = default; //does nothing
+	Shader(const std::filesystem::path& VS_file, const std::filesystem::path& FS_file);
 
 	void activate(void) { glUseProgram(ID); }
 	void deactivate(void) { glUseProgram(0); }

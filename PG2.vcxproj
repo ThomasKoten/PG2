@@ -159,8 +159,7 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="OBJloader.cpp" />
     <ClCompile Include="PG2.cpp" />
-    <ClCompile Include="ShaderProgram.cpp" />
-    <ClCompile Include="Vertex.cpp" />
+    <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -170,7 +169,8 @@
     <ClInclude Include="Model.h" />
     <ClInclude Include="OBJloader.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="ShaderProgram.h" />
+    <ClInclude Include="Shader.h" />
+    <ClInclude Include="StringUtils.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>

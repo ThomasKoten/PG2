@@ -1,4 +1,4 @@
-
+#pragma once
 #include <vector>
 #include <fstream>
 #include <sstream>
@@ -7,25 +7,24 @@
 #include <glm/ext.hpp>
 #include <GL/glew.h>
 
-#include "ShaderProgram.h"
+#include "Shader.h"
 
 
 
-ShaderProgram::ShaderProgram(const std::filesystem::path& VS_file, const std::filesystem::path& FS_file) {
+Shader::Shader(const std::filesystem::path& VS_file, const std::filesystem::path& FS_file) {
 	std::vector<GLuint> shader_ids;
-	GLuint VS_h, FS_h,prog_h;
+	GLuint VS_h, FS_h;
 	VS_h = compile_shader(VS_file, GL_VERTEX_SHADER);
 	FS_h = compile_shader(FS_file, GL_FRAGMENT_SHADER);
 	shader_ids.push_back(VS_h);
 	shader_ids.push_back(FS_h);
 
-	prog_h = link_shader(shader_ids);
-	glUseProgram(prog_h);
+	ID = link_shader(shader_ids);
 
 }
 // TODO: load, compile, and link shader
 
-void ShaderProgram::setUniform(const std::string& name, const float val) {
+void Shader::setUniform(const std::string& name, const float val) {
 	auto loc = glGetUniformLocation(ID, name.c_str());
 	if (loc == -1) {
 		std::cerr << "no uniform with name:" << name << '\n';
@@ -36,7 +35,7 @@ void ShaderProgram::setUniform(const std::string& name, const float val) {
 
 
 
-void ShaderProgram::setUniform(const std::string& name, const glm::vec3 val)
+void Shader::setUniform(const std::string& name, const glm::vec3 val)
 {
 	auto loc = glGetUniformLocation(ID, name.c_str());
 	if (loc == -1) {
@@ -46,7 +45,7 @@ void ShaderProgram::setUniform(const std::string& name, const glm::vec3 val)
 	glUniform3fv(loc, 1, glm::value_ptr(val));
 }
 
-void ShaderProgram::setUniform(const std::string& name, const glm::vec4 val) {
+void Shader::setUniform(const std::string& name, const glm::vec4 val) {
 	auto loc = glGetUniformLocation(ID, name.c_str());
 	if (loc == -1) {
 		std::cerr << "no uniform with name:" << name << '\n';
@@ -55,7 +54,7 @@ void ShaderProgram::setUniform(const std::string& name, const glm::vec4 val) {
 	glUniform4fv(loc, 1, glm::value_ptr(val));
 }
 
-void ShaderProgram::setUniform(const std::string& name, const glm::mat3 val) {
+void Shader::setUniform(const std::string& name, const glm::mat3 val) {
 	auto loc = glGetUniformLocation(ID, name.c_str());
 	if (loc == -1) {
 		std::cout << "no uniform with name:" << name << '\n';
@@ -65,7 +64,7 @@ void ShaderProgram::setUniform(const std::string& name, const glm::mat3 val) {
 
 }
 
-void ShaderProgram::setUniform(const std::string& name, const glm::mat4 val) {
+void Shader::setUniform(const std::string& name, const glm::mat4 val) {
 	auto loc = glGetUniformLocation(ID, name.c_str());
 	if (loc == -1) {
 		std::cout << "no uniform with name:" << name << '\n';
@@ -74,7 +73,7 @@ void ShaderProgram::setUniform(const std::string& name, const glm::mat4 val) {
 	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(val));
 }
 
-std::string ShaderProgram::getShaderInfoLog(const GLuint obj)
+std::string Shader::getShaderInfoLog(const GLuint obj)
 {
 	int infologLength = 0;
 	std::string s;
@@ -87,7 +86,7 @@ std::string ShaderProgram::getShaderInfoLog(const GLuint obj)
 	return s;
 }
 
-std::string ShaderProgram::getProgramInfoLog(const GLuint obj)
+std::string Shader::getProgramInfoLog(const GLuint obj)
 {
 	int infologLength = 0;
 	std::string s;
@@ -100,7 +99,7 @@ std::string ShaderProgram::getProgramInfoLog(const GLuint obj)
 	return s;
 }
 
-GLuint ShaderProgram::compile_shader(const std::filesystem::path& source_file, const GLenum type)
+GLuint Shader::compile_shader(const std::filesystem::path& source_file, const GLenum type)
 {
 	GLuint shader_ID = glCreateShader(type);
 	std::string str = textFileRead(source_file);
@@ -108,6 +107,7 @@ GLuint ShaderProgram::compile_shader(const std::filesystem::path& source_file, c
 
 	glShaderSource(shader_ID, 1, &shader_string, NULL);
 	glCompileShader(shader_ID);
+
 	{
 		GLint cmpl_status;
 		glGetShaderiv(shader_ID, GL_COMPILE_STATUS, &cmpl_status);
@@ -119,7 +119,7 @@ GLuint ShaderProgram::compile_shader(const std::filesystem::path& source_file, c
 	return shader_ID;
 }
 
-GLuint ShaderProgram::link_shader(const std::vector<GLuint> shader_ids)
+GLuint Shader::link_shader(const std::vector<GLuint> shader_ids)
 {
 	GLuint prog_h = glCreateProgram();
 	for (GLuint id : shader_ids)
@@ -139,7 +139,7 @@ GLuint ShaderProgram::link_shader(const std::vector<GLuint> shader_ids)
 	return prog_h;
 }
 
-std::string ShaderProgram::textFileRead(const std::filesystem::path& filename)
+std::string Shader::textFileRead(const std::filesystem::path& filename)
 {
 	std::ifstream file(filename);
 	if (!file.is_open())

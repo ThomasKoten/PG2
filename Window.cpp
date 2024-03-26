@@ -1,3 +1,4 @@
+#pragma once
 #include "Window.h"
 
 Window::Window(int width, int height, const char* title, bool fullscreen, bool vsync)
@@ -35,8 +36,8 @@ Window::Window(int width, int height, const char* title, bool fullscreen, bool v
 }
 
 Window::~Window() {
-    glfwDestroyWindow(window);
-    glfwTerminate();
+	glfwDestroyWindow(window);
+	glfwTerminate();
 }
 
 void Window::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
