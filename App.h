@@ -21,7 +21,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 
-#include "ShaderProgram.h"
+#include "Shader.h"
 #include "Model.h"
 #include "Mesh.h"
 #include "gl_err_callback.h"
@@ -40,13 +40,13 @@ public:
 	void init_assets();
 	bool init(void);
 	int run(void);
-	
+
 	~App();
 
 private:
 	Window* window;
 
-	std::unordered_map<std::string, Model> scene;
-	ShaderProgram shader;
+	std::vector<Model> scene;
+	Shader shader;
 };
 

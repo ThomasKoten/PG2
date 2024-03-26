@@ -1,30 +1,23 @@
 #pragma once
-#include <iostream>
-#include <filesystem>
-
-#include "Vertex.h"
 #include "Mesh.h"
-
-#include "ShaderProgram.h"
+#include "Shader.h"
 
 class Model
 {
 public:
+	Model(const std::filesystem::path& filename);
 
-    Model(const std::filesystem::path& filename);
-
-    void Draw(ShaderProgram& shader);
+	void Draw(Shader& shader);
 
 private:
-    std::vector<Mesh> meshes;
-    std::string name;
+	std::vector<Mesh> meshes;
+	std::string name;
 
 
-    void LoadOBJFile(const std::filesystem::path& filename); //TODO: modify
-    void LoadMTLFile(const std::filesystem::path& filename); //TODO: implement
+	void LoadOBJFile(const std::filesystem::path& filename);
+	void LoadMTLFile(const std::filesystem::path& filename); //TODO: implement
 
-    //GLuint LoadTexture(const std::filesystem::pathg& filename);
 
-    std::vector<Vertex> vertexes{};
-    std::vector<GLuint> vertex_indices{};
+	std::vector<Vertex> vertexes{};
+	std::vector<GLuint> vertex_indices{};
 };

@@ -1,6 +1,7 @@
-﻿
+﻿#pragma once
 #include "App.h"
 #include "Model.h"
+#include "Shader.h"
 
 int xpos, ypos, width, height;
 void getString(const std::string name, GLenum symb_const) {
@@ -23,16 +24,10 @@ App::App()
 	window = new Window(800, 600, "OpenGL Window");
 }
 
-//CursorMoveCallback(*window, int x, int y) {
-//	static lastx, lasty;
-//	camera.processmovement(x - lastx, y - lasty);
-//	x = lastx;
-//	y = lasty;
-//
-//}
-
 bool App::init()
 {
+	try {
+
 		//glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 		//glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 		//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
@@ -40,7 +35,6 @@ bool App::init()
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-		glEnable(GL_DEPTH_TEST);
 
 		glfwSwapInterval(1);
 
@@ -56,25 +50,36 @@ bool App::init()
 
 		wglewInit();
 
-	std::cout << "Initialized...\n";
+		//report();
 
-	report();
+		if (GLEW_ARB_debug_output)
+		{
+			glDebugMessageCallback(MessageCallback, 0);
+			glEnable(GL_DEBUG_OUTPUT);
 
-	if (GLEW_ARB_debug_output)
-	{
-		glDebugMessageCallback(MessageCallback, 0);
-		glEnable(GL_DEBUG_OUTPUT);
+			//default is asynchronous debug output, use this to simulate glGetError() functionality
+			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 
-		//default is asynchronous debug output, use this to simulate glGetError() functionality
-		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+			std::cout << "GL_DEBUG enabled." << std::endl;
+		}
+		else
+			std::cout << "GL_DEBUG NOT SUPPORTED!" << std::endl;
 
-		std::cout << "GL_DEBUG enabled." << std::endl;
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		glFrontFace(GL_CCW);
+		glEnable(GL_DEPTH_TEST);
+
+		init_assets();
 	}
-	else
-		std::cout << "GL_DEBUG NOT SUPPORTED!" << std::endl;
-	init_assets();
 
+	catch (std::exception const& e) {
+		std::cerr << "Init failed : " << e.what() << "\n";
+		//throw;
+		exit(-1);
+	}
 
+	std::cout << "Initialized...\n";
 	return true;
 }
 
@@ -84,7 +89,7 @@ int App::run(void)
 	int nbFrames = 0;
 	double elapsedTime;
 	try {
-		glm::vec4 my_rgba = { 0.0f, 1.0f, 0.0f, 1.0f };
+		//glm::vec4 my_rgba = { 0.0f, 1.0f, 0.0f, 1.0f };
 		while (!glfwWindowShouldClose(window->getWindow()))
 		{
 			double currentTime = glfwGetTime();
@@ -95,11 +100,28 @@ int App::run(void)
 				// printf and reset timer
 				std::cout << (double(nbFrames) / elapsedTime) << std::endl;
 				nbFrames = 0;
-
 			}
 
 			// Clear OpenGL canvas, both color buffer and Z-buffer
+			glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			glm::mat4 trans = glm::mat4(1.0f);
+			trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
+			shader.setUniform("transform", trans);
+
+			glm::mat4 view = glm::mat4(1.0f);
+			// note that we're translating the scene in the reverse direction of where we want to move
+			view = glm::translate(view, glm::vec3(0.0f, -1.5f, -12.5f));
+			shader.setUniform("view", view);
+
+			glm::mat4 projection = glm::mat4(1.0f);
+			projection = glm::perspective(glm::radians(60.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
+			shader.setUniform("projection", projection);
+
+			for (auto& model : scene) {
+				model.Draw(shader);
+			}
 
 			// Swap front and back buffers
 			glfwSwapBuffers(window->getWindow());
@@ -128,9 +150,7 @@ App::~App()
 void App::init_assets()
 {
 	// load models, load textures, load shaders, initialize level, etc...
-	std::filesystem::path VS_path("./resources/basic/basic.vert");
-	std::filesystem::path FS_path("./resources/basic/basic.frag");
-	shader = ShaderProgram(VS_path, FS_path);
+	shader = Shader(VS_PATH, FS_PATH);
 
 	//std::filesystem::path model_path("./resources/obj/bunny_tri_vn.obj");
 	//std::filesystem::path model_path("./resources/obj/bunny_tri_vnt.obj");
@@ -141,7 +161,7 @@ void App::init_assets()
 	//std::filesystem::path model_path("./resources/obj/teapot_tri_vnt.obj");
 	Model my_model{ model_path };
 
-	scene.insert({ "obj_test", my_model });
+	scene.push_back(my_model);
 }
 
 void App::report() {
