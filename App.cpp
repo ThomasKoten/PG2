@@ -1,9 +1,8 @@
-﻿#pragma once
+﻿#pragma once //Light a material definovat v Shader i App
 #include "App.h"
 #include "Model.h"
 #include "Shader.h"
 
-int xpos, ypos, width, height;
 void getString(const std::string name, GLenum symb_const) {
 	const char* mystring = (const char*)glGetString(symb_const);
 	std::cout << name << ": " << mystring << '\n';
@@ -14,6 +13,10 @@ void getInt(const std::string& name, GLenum pname) {
 	glGetIntegerv(pname, &myInt);
 	std::cout << name << ": " << myInt << '\n';
 }
+
+Camera App::camera = Camera(glm::vec3(0, 0, 1000));
+double App::last_cursor_xpos{};
+double App::last_cursor_ypos{};
 
 
 App::App()
@@ -27,6 +30,7 @@ App::App()
 bool App::init()
 {
 	try {
+		glfwSetCursorPosCallback(window->getWindow(), cursor_pos_callback);
 
 		//glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 		//glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -50,8 +54,6 @@ bool App::init()
 
 		wglewInit();
 
-		//report();
-
 		if (GLEW_ARB_debug_output)
 		{
 			glDebugMessageCallback(MessageCallback, 0);
@@ -64,11 +66,6 @@ bool App::init()
 		}
 		else
 			std::cout << "GL_DEBUG NOT SUPPORTED!" << std::endl;
-
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK);
-		glFrontFace(GL_CCW);
-		glEnable(GL_DEPTH_TEST);
 
 		init_assets();
 	}
@@ -89,7 +86,14 @@ int App::run(void)
 	int nbFrames = 0;
 	double elapsedTime;
 	try {
-		//glm::vec4 my_rgba = { 0.0f, 1.0f, 0.0f, 1.0f };
+		window->update_projection_matrix();
+		glViewport(0, 0, window->getWidth(), window->getHeight());
+
+		camera.Position = glm::vec3(0, 0, 10);
+		double last_frame_time = glfwGetTime();
+		glm::vec3 camera_movement{};
+
+		glm::vec4 green = { 0.0f, 0.5f, 0.0f, 1.0f };
 		while (!glfwWindowShouldClose(window->getWindow()))
 		{
 			double currentTime = glfwGetTime();
@@ -106,20 +110,29 @@ int App::run(void)
 			glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+			double delta_t = glfwGetTime() - last_frame_time;
+			last_frame_time = glfwGetTime();
+
+			camera_movement = camera.ProcessInput(window->getWindow(), static_cast<float>(delta_t));
+			camera.Position += camera_movement;
+
+			shader.activate();
 			glm::mat4 trans = glm::mat4(1.0f);
 			trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
-			shader.setUniform("transform", trans);
 
 			glm::mat4 view = glm::mat4(1.0f);
-			// note that we're translating the scene in the reverse direction of where we want to move
-			view = glm::translate(view, glm::vec3(0.0f, -1.5f, -12.5f));
+			view = camera.GetViewMatrix();
+
+			//glm::mat4 projection = glm::mat4(1.0f);
+			//projection = glm::perspective(glm::radians(60.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
+
+
+			shader.setUniform("my_color", green);
+			shader.setUniform("projection", window->getProjection());
+			shader.setUniform("transform", trans);
 			shader.setUniform("view", view);
 
-			glm::mat4 projection = glm::mat4(1.0f);
-			projection = glm::perspective(glm::radians(60.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
-			shader.setUniform("projection", projection);
-
-			for (auto& model : scene) {
+			for (auto& model : scene_test) {
 				model.Draw(shader);
 			}
 
@@ -153,15 +166,15 @@ void App::init_assets()
 	shader = Shader(VS_PATH, FS_PATH);
 
 	//std::filesystem::path model_path("./resources/obj/bunny_tri_vn.obj");
-	//std::filesystem::path model_path("./resources/obj/bunny_tri_vnt.obj");
+	std::filesystem::path model_path("./resources/obj/bunny_tri_vnt.obj");
 	//std::filesystem::path model_path("./resources/obj/cube_triangles.obj");
 	//std::filesystem::path model_path("./resources/obj/cube_triangles_normals_tex.obj");
 	//std::filesystem::path model_path("./resources/obj/plane_tri_vnt.obj");
-	std::filesystem::path model_path("./resources/obj/sphere_tri_vnt.obj");
+	//std::filesystem::path model_path("./resources/obj/sphere_tri_vnt.obj");
 	//std::filesystem::path model_path("./resources/obj/teapot_tri_vnt.obj");
 	Model my_model{ model_path };
 
-	scene.push_back(my_model);
+	scene_test.push_back(my_model);
 }
 
 void App::report() {
@@ -181,4 +194,9 @@ void App::report() {
 		std::cout << "Context is compatibility profile." << '\n';
 	else
 		std::cout << "Context has no profile." << '\n';
+
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glFrontFace(GL_CCW);
+	glEnable(GL_DEPTH_TEST);
 }

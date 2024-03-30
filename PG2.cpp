@@ -45,5 +45,6 @@ void getFPS(GLFWwindow* window) {
 int main()
 {
 	if (app.init())
-		return app.run();
+		app.report();
+	return app.run();
 }

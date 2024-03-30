@@ -26,6 +26,7 @@
 #include "Mesh.h"
 #include "gl_err_callback.h"
 #include "Window.h"
+#include "Camera.h"
 
 class App
 {
@@ -36,6 +37,8 @@ public:
 	void glew_init();
 	void glew_register_callback();
 
+	static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos);
+
 	void report();
 	void init_assets();
 	bool init(void);
@@ -43,10 +46,19 @@ public:
 
 	~App();
 
+
 private:
 	Window* window;
 
-	std::vector<Model> scene;
+	std::vector<Model> scene_test;
 	Shader shader;
+
+	std::unordered_map<std::string, Mesh> scene;
+
+	static Camera camera;
+	static double last_cursor_xpos;
+	static double last_cursor_ypos;
+
+
 };
 

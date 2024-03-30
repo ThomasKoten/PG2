@@ -1,5 +1,8 @@
 #pragma once
-#include "Window.h"
+#include "App.h"
+
+int Window::width = 800;
+int Window::height = 600;
 
 Window::Window(int width, int height, const char* title, bool fullscreen, bool vsync)
 	: fullscreen(fullscreen), VSync(vsync) {
@@ -32,7 +35,6 @@ Window::Window(int width, int height, const char* title, bool fullscreen, bool v
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetScrollCallback(window, scroll_callback);
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
-	glfwSetCursorPosCallback(window, cursor_pos_callback);
 }
 
 Window::~Window() {
@@ -41,7 +43,15 @@ Window::~Window() {
 }
 
 void Window::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-	std::cout << "Current size: " << width << "x" << height << std::endl;
+	auto this_inst = static_cast<Window*>(glfwGetWindowUserPointer(window));
+	this_inst->width = width;
+	this_inst->height = height;
+
+	// set viewport
+	glViewport(0, 0, width, height);
+	//now your canvas has [0,0] in bottom left corner, and its size is [width x height] 
+
+	this_inst->update_projection_matrix();
 }
 
 void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -84,23 +94,35 @@ void Window::window_iconify_callback(GLFWwindow* window, int iconified) {
 }
 
 void Window::scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-	if (yoffset > 0.0) {
-		std::cout << "tocis dolu...\n";
-	}
-	if (yoffset < 0.0) {
-		std::cout << "tocis nahoru...\n";
-	}
-	if (xoffset > 0.0) {
-		std::cout << "tocis doprava...\n";
-	}
-	if (xoffset < 0.0) {
-		std::cout << "tocis doleva...\n";
-	}
+	auto this_inst = static_cast<Window*>(glfwGetWindowUserPointer(window));
+	this_inst->FOV += 10 * yoffset;
+	this_inst->FOV = std::clamp(this_inst->FOV, 20.0f, 170.0f); // limit FOV to reasonable values...
+
+	this_inst->update_projection_matrix();
 }
 
+void Window::update_projection_matrix(void)
+{
+	if (height < 1)
+		height = 1;   // avoid division by 0
 
-void Window::cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {
-	std::cout << "?" << std::ends;
+	float ratio = static_cast<float>(width) / height;
+
+	projection_matrix = glm::perspective(
+		glm::radians(FOV),   // The vertical Field of View, in radians: the amount of "zoom". Think "camera lens". Usually between 90° (extra wide) and 30° (quite zoomed in)
+		ratio,               // Aspect Ratio. Depends on the size of your window.
+		0.1f,                // Near clipping plane. Keep as big as possible, or you'll get precision issues.
+		20000.0f             // Far clipping plane. Keep as little as possible.
+	);
+}
+
+void App::cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+		camera.ProcessMouseMovement(static_cast<GLfloat>(last_cursor_xpos - xpos), static_cast<GLfloat>(ypos - last_cursor_ypos));
+	}
+	last_cursor_xpos = xpos;
+	last_cursor_ypos = ypos;
 }
 
 void Window::set_vsync(bool state) {
@@ -145,8 +167,12 @@ bool Window::isFullscreen() const {
 	return fullscreen;
 }
 
-bool Window::getVSyncState() const {
-	return VSync;
+int Window::getWidth() {
+	return width;
+}
+
+int Window::getHeight() {
+	return height;
 }
 
 GLFWmonitor* Window::getMonitor() {

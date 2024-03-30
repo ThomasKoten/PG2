@@ -1,8 +1,13 @@
 #ifndef OPENGL_WINDOW_H
 #define OPENGL_WINDOW_H
 
-#include <GLFW/glfw3.h>
 #include <iostream>
+#include <random>
+
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 class Window
 {
 public:
@@ -19,15 +24,21 @@ public:
 	static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 	static void window_iconify_callback(GLFWwindow* window, int iconified);
 	static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
-	static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos);
 
 	bool isVSynced() const;
 	bool isFullscreen() const;
-	bool getVSyncState() const;
+
+	int getWidth();
+	int getHeight();
 
 	GLFWmonitor* getMonitor();
 	const GLFWvidmode* getMode();
 	GLFWwindow* getWindow() const;
+
+	void update_projection_matrix(void);
+	glm::mat4 getProjection() {
+		return projection_matrix;
+	}
 
 private:
 	static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -38,6 +49,12 @@ private:
 
 	GLFWmonitor* monitor;
 	const GLFWvidmode* mode;
+
+	static int width;
+	static int height;
+	float FOV = 89.0f;
+	glm::mat4 projection_matrix = glm::identity<glm::mat4>();
+
 };
 
 #endif
