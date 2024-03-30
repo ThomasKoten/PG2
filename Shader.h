@@ -4,8 +4,8 @@
 #include <iostream>
 #include <fstream>
 
-#include <glm/ext.hpp>
 #include <GL/glew.h> 
+#include <glm/ext.hpp>
 
 #define  VS_PATH std::filesystem::path("./resources/shaders/basic.vert")
 #define FS_PATH std::filesystem::path("./resources/shaders/basic.frag")
@@ -36,8 +36,6 @@ public:
 
 	void setUniform(const std::string& name, const glm::mat3 val);
 	void setUniform(const std::string& name, const glm::mat4 val);
-
-	//...
 
 private:
 	GLuint ID{ 0 }; // default = 0, empty shader

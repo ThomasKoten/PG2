@@ -3,9 +3,8 @@
 #include <fstream>
 #include <sstream>
 
-
-#include <glm/ext.hpp>
 #include <GL/glew.h>
+#include <glm/ext.hpp>
 
 #include "Shader.h"
 

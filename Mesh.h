@@ -1,13 +1,14 @@
 #pragma once
 
-#include <glm/glm.hpp> 
-#include <glm/ext.hpp>
 #include <string>
 #include <vector>
 
 #include "Vertex.h"
 #include "Shader.h"
 #include <GL/glew.h>
+
+#include <glm/glm.hpp> 
+#include <glm/ext.hpp>
 
 class Mesh {
 public:
