@@ -40,7 +40,7 @@ bool App::init()
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-		glfwSwapInterval(1);
+		//glfwSwapInterval(1);
 
 
 		// init glew
@@ -85,6 +85,11 @@ int App::run(void)
 	double previousTime = glfwGetTime();
 	int nbFrames = 0;
 	double elapsedTime;
+	glm::vec3 rgb_orange = { 0.208f, 0.157f, 0.118f };
+	//glm::vec3 rgb_orange = { 0.255f, 0.098f, 0.0f };
+	glm::vec3 rgb_white = { 1.0f, 1.0f, 1.0f };
+	glm::vec4 rgba_white = { 1.0f, 1.0f, 1.0f, 1.0f };
+
 	try {
 		window->update_projection_matrix();
 		glViewport(0, 0, window->getWidth(), window->getHeight());
@@ -125,12 +130,14 @@ int App::run(void)
 
 			//glm::mat4 projection = glm::mat4(1.0f);
 			//projection = glm::perspective(glm::radians(60.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
-
-
-			shader.setUniform("my_color", green);
+			
 			shader.setUniform("projection", window->getProjection());
 			shader.setUniform("transform", trans);
 			shader.setUniform("view", view);
+			shader.setUniform("ambient_material", rgb_orange);
+			shader.setUniform("diffuse_material", rgb_orange);
+			shader.setUniform("specular_material", rgb_white);
+			shader.setUniform("specular_shinines", 10.0f);
 
 			for (auto& model : scene_test) {
 				model.Draw(shader);
@@ -166,11 +173,11 @@ void App::init_assets()
 	shader = Shader(VS_PATH, FS_PATH);
 
 	//std::filesystem::path model_path("./resources/obj/bunny_tri_vn.obj");
-	std::filesystem::path model_path("./resources/obj/bunny_tri_vnt.obj");
+	//std::filesystem::path model_path("./resources/obj/bunny_tri_vnt.obj");
 	//std::filesystem::path model_path("./resources/obj/cube_triangles.obj");
 	//std::filesystem::path model_path("./resources/obj/cube_triangles_normals_tex.obj");
 	//std::filesystem::path model_path("./resources/obj/plane_tri_vnt.obj");
-	//std::filesystem::path model_path("./resources/obj/sphere_tri_vnt.obj");
+	std::filesystem::path model_path("./resources/obj/sphere_tri_vnt.obj");
 	//std::filesystem::path model_path("./resources/obj/teapot_tri_vnt.obj");
 	Model my_model{ model_path };
 
@@ -185,8 +192,6 @@ void App::report() {
 	getString("Renderer", GL_RENDERER);
 	getString("Shading version", GL_SHADING_LANGUAGE_VERSION);
 	getInt("Context profile mask", GL_CONTEXT_PROFILE_MASK);
-	//getInt("Context compatibility", GL_CONTEXT_COMPATIBILITY_PROFILE_BIT);
-	getInt("Context core profile bit", GL_CONTEXT_CORE_PROFILE_BIT);
 
 	if (contextProfile & GL_CONTEXT_CORE_PROFILE_BIT)
 		std::cout << "Context is core profile" << '\n';

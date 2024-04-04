@@ -7,8 +7,8 @@
 #include <GL/glew.h> 
 #include <glm/ext.hpp>
 
-#define  VS_PATH std::filesystem::path("./resources/shaders/basic.vert")
-#define FS_PATH std::filesystem::path("./resources/shaders/basic.frag")
+#define  VS_PATH std::filesystem::path("./resources/shaders/perFragmentL.vert")
+#define FS_PATH std::filesystem::path("./resources/shaders/perFragmentL.frag")
 class Shader {
 public:
 	// you can add more constructors for pipeline with GS, TS etc.
