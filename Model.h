@@ -5,7 +5,7 @@
 class Model
 {
 public:
-	Model(const std::filesystem::path& filename);
+	Model(const std::filesystem::path& filename, const std::filesystem::path& path_tex);
 
 	void Draw(Shader& shader);
 

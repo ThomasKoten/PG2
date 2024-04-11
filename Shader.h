@@ -7,8 +7,8 @@
 #include <GL/glew.h> 
 #include <glm/ext.hpp>
 
-#define  VS_PATH std::filesystem::path("./resources/shaders/perFragmentL.vert")
-#define FS_PATH std::filesystem::path("./resources/shaders/perFragmentL.frag")
+#define  VS_PATH std::filesystem::path("./resources/shaders/FragLT.vert")
+#define FS_PATH std::filesystem::path("./resources/shaders/FragLT.frag")
 class Shader {
 public:
 	// you can add more constructors for pipeline with GS, TS etc.
@@ -29,6 +29,9 @@ public:
 
 	// set uniform according to name 
 	// https://docs.gl/gl4/glUniform
+	
+	void setUniform(const std::string& name, const int val);
+
 	void setUniform(const std::string& name, const float val);
 
 	void setUniform(const std::string& name, const glm::vec3 val);

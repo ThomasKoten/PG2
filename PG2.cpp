@@ -13,6 +13,7 @@
 
 #include "App.h"
 #include "Model.h"
+#include <opencv2\opencv.hpp>
 
 App app;
 

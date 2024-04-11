@@ -9,7 +9,7 @@ Mesh::Mesh(GLenum primitive_type, std::vector<Vertex>& vertices, std::vector<GLu
 	primitive_type(primitive_type),
 	vertices(vertices),
 	indices(indices),
-	texture_id(texture_id)
+	Tex_ID(texture_id)
 {
 
 	Shader my_shader = Shader(VS_PATH, FS_PATH);
@@ -39,7 +39,7 @@ Mesh::Mesh(GLenum primitive_type, std::vector<Vertex>& vertices, std::vector<GLu
 	glVertexAttribPointer(normals_location, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(0 + offsetof(Vertex, Normal)));
 	glEnableVertexAttribArray(normals_location);
 	// Set end enable Vertex Attribute forTexture Coordinates
-	uvs_location = glGetAttribLocation(my_shader.getShaderID(), "aTex"); //name in shader src
+	uvs_location = glGetAttribLocation(my_shader.getShaderID(), "aTexCoord"); //name in shader src
 	if (uvs_location < 0) uvs_location = 2;
 	glVertexAttribPointer(uvs_location, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(0 + offsetof(Vertex, UVs)));
 	glEnableVertexAttribArray(uvs_location);
@@ -56,7 +56,15 @@ void Mesh::Draw(Shader& shader) {
 	// TODO: set uniform variables: color
 	//glm::vec3 color= { 1.0f, 0.0f, 0.0f};
 	//shader.setUniform("color", color);
-
+	if (Tex_ID > 0) {
+		//set texture id etc...
+		glActiveTexture(GL_TEXTURE0);
+		//if (texture_id > 0) {
+		glBindTexture(GL_TEXTURE_2D, Tex_ID);
+		//    glActiveTexture(GL_TEXTURE0);
+		//shader.setUniform("uTexture", 0);
+		//    glBindTexture(GL_TEXTURE_2D, texture_id);
+	}
 	shader.activate();
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
@@ -67,7 +75,7 @@ void Mesh::Draw(Shader& shader) {
 void Mesh::clear(void) {
 	vertices.clear();
 	indices.clear();
-	texture_id = 0;
+	Tex_ID = 0;
 	primitive_type = GL_POINT;
 
 	glDeleteBuffers(1, &VBO);

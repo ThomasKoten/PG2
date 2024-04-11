@@ -2,6 +2,7 @@
 #include "App.h"
 #include "Model.h"
 #include "Shader.h"
+#include <opencv2\opencv.hpp>
 
 void getString(const std::string name, GLenum symb_const) {
 	const char* mystring = (const char*)glGetString(symb_const);
@@ -30,6 +31,8 @@ App::App()
 bool App::init()
 {
 	try {
+		cv::imread("C:\\Users\\Tommy\\Desktop\\IMG\\Dan\\1.jpg");
+		glfwWindowHint(GLFW_SAMPLES, 4);
 		glfwSetCursorPosCallback(window->getWindow(), cursor_pos_callback);
 
 		//glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -75,7 +78,7 @@ bool App::init()
 		//throw;
 		exit(-1);
 	}
-
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	std::cout << "Initialized...\n";
 	return true;
 }
@@ -134,14 +137,30 @@ int App::run(void)
 			shader.setUniform("projection", window->getProjection());
 			shader.setUniform("transform", trans);
 			shader.setUniform("view", view);
-			shader.setUniform("ambient_material", rgb_orange);
-			shader.setUniform("diffuse_material", rgb_orange);
+			shader.setUniform("ambient_material", rgb_white);
+			shader.setUniform("diffuse_material", rgb_white);
 			shader.setUniform("specular_material", rgb_white);
-			shader.setUniform("specular_shinines", 10.0f);
-
-			for (auto& model : scene_test) {
+			shader.setUniform("specular_shinines", 1.0f);
+			
+			for (auto& model : scene_opaque) {
 				model.Draw(shader);
 			}
+			// - Draw transparent objects
+			glEnable(GL_BLEND);         // enable blending
+			glDisable(GL_CULL_FACE);    // no polygon removal
+			glDepthMask(GL_FALSE);      // set Z to read-only
+			// TODO: sort by distance from camera, from far to near
+			for (auto& model : scene_transparent) {
+				model.Draw(shader);
+			}
+			glDisable(GL_BLEND);
+			glEnable(GL_CULL_FACE);
+			glDepthMask(GL_TRUE);
+
+
+
+
+
 
 			// Swap front and back buffers
 			glfwSwapBuffers(window->getWindow());
@@ -172,16 +191,18 @@ void App::init_assets()
 	// load models, load textures, load shaders, initialize level, etc...
 	shader = Shader(VS_PATH, FS_PATH);
 
-	//std::filesystem::path model_path("./resources/obj/bunny_tri_vn.obj");
 	//std::filesystem::path model_path("./resources/obj/bunny_tri_vnt.obj");
-	//std::filesystem::path model_path("./resources/obj/cube_triangles.obj");
-	//std::filesystem::path model_path("./resources/obj/cube_triangles_normals_tex.obj");
+	std::filesystem::path model_path("./resources/obj/cube_triangles_normals_tex.obj");
 	//std::filesystem::path model_path("./resources/obj/plane_tri_vnt.obj");
-	std::filesystem::path model_path("./resources/obj/sphere_tri_vnt.obj");
+	//std::filesystem::path model_path("./resources/obj/sphere_tri_vnt.obj");
 	//std::filesystem::path model_path("./resources/obj/teapot_tri_vnt.obj");
-	Model my_model{ model_path };
+	std::filesystem::path tex_path("./resources/textures/box_rgb888.png");
 
-	scene_test.push_back(my_model);
+	Model my_model{ model_path, tex_path};
+
+	//scene_test.push_back(my_model);
+	scene_opaque.push_back(Model("./resources/obj/cube_tri_vnt.obj", "./resources/textures/box_rgb888.png"));
+	scene_transparent.push_back(Model("./resources/obj/teapot_tri_vnt.obj", "./resources/textures/Glass.png"));
 }
 
 void App::report() {

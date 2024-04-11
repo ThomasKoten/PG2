@@ -32,5 +32,5 @@ public:
 private:
 	// OpenGL buffer IDs
 	// ID = 0 is reserved (i.e. uninitalized)
-	unsigned int VAO{0}, VBO{ 0 }, EBO{ 0 };
+	unsigned int VAO{ 0 }, VBO{ 0 }, EBO{ 0 }, Tex_ID{ 0 };
 };

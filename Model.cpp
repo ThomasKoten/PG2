@@ -1,15 +1,14 @@
 #include "OBJloader.h"
 #include "Model.h"
+#include "Texture.h"
 
-Model::Model(const std::filesystem::path& filename) {
+Model::Model(const std::filesystem::path& filename, const std::filesystem::path& path_tex) {
 	std::filesystem::path file_ext = filename.extension();
 	if (file_ext == ".obj") {
 		LoadOBJFile(filename);
-		Mesh mesh = Mesh(GL_TRIANGLES, vertexes, vertex_indices, 0);
+		GLuint texture_id = textureInit(path_tex.string().c_str());
+		Mesh mesh = Mesh(GL_TRIANGLES, vertexes, vertex_indices, texture_id);
 		meshes.push_back(mesh);
-	}
-	else if (file_ext == ".mtl") {
-		//LoadMTLFile(filename);
 	}
 	// TODO: call LoadOBJFile, LoadMTLFile, process data, create mesh and set its properties 
 }

@@ -59,6 +59,8 @@ private:
 	static double last_cursor_xpos;
 	static double last_cursor_ypos;
 
+	std::vector<Model> scene_opaque;
+	std::vector<Model> scene_transparent;
 
 };
 
