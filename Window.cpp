@@ -194,7 +194,7 @@ void Window::set_fullscreen(bool fullscreen) {
 	if (fullscreen) {
 		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-		glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, GLFW_DONT_CARE);
+		glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, GLFW_DONT_CARE); //GLFW_DONT_CARE seems to be the issue
 		std::cout << "Fullscreen" << std::endl;
 	}
 	else {

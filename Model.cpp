@@ -2,8 +2,9 @@
 #include "Model.h"
 #include "Texture.h"
 
-Model::Model(const std::filesystem::path& filename, const std::filesystem::path& path_tex) {
+Model::Model(const std::filesystem::path& filename, const std::filesystem::path& path_tex, glm::vec3 obj_position) {
 	std::filesystem::path file_ext = filename.extension();
+	position = obj_position;
 	if (file_ext == ".obj") {
 		LoadOBJFile(filename);
 		GLuint texture_id = textureInit(path_tex.string().c_str());
@@ -19,6 +20,12 @@ void Model::Draw(Shader& shader) {
 		mesh.Draw(shader);
 	}
 }
+
+glm::mat4 Model::getTransMatrix(glm::mat4 trans) {
+	return glm::translate(trans,position);
+}
+
+
 
 void Model::LoadOBJFile(const std::filesystem::path& filename)
 {

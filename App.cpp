@@ -31,8 +31,7 @@ App::App()
 bool App::init()
 {
 	try {
-		cv::imread("C:\\Users\\Tommy\\Desktop\\IMG\\Dan\\1.jpg");
-		glfwWindowHint(GLFW_SAMPLES, 4);
+		glfwWindowHint(GLFW_SAMPLES, 1);
 		glfwSetCursorPosCallback(window->getWindow(), cursor_pos_callback);
 
 		//glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -89,7 +88,6 @@ int App::run(void)
 	int nbFrames = 0;
 	double elapsedTime;
 	glm::vec3 rgb_orange = { 0.208f, 0.157f, 0.118f };
-	//glm::vec3 rgb_orange = { 0.255f, 0.098f, 0.0f };
 	glm::vec3 rgb_white = { 1.0f, 1.0f, 1.0f };
 	glm::vec4 rgba_white = { 1.0f, 1.0f, 1.0f, 1.0f };
 
@@ -126,8 +124,8 @@ int App::run(void)
 
 			shader.activate();
 			glm::mat4 trans = glm::mat4(1.0f);
-			trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
-
+			//trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
+			trans = glm::mat4{1.0f};
 			glm::mat4 view = glm::mat4(1.0f);
 			view = camera.GetViewMatrix();
 
@@ -135,7 +133,6 @@ int App::run(void)
 			//projection = glm::perspective(glm::radians(60.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
 			
 			shader.setUniform("projection", window->getProjection());
-			shader.setUniform("transform", trans);
 			shader.setUniform("view", view);
 			shader.setUniform("ambient_material", rgb_white);
 			shader.setUniform("diffuse_material", rgb_white);
@@ -143,6 +140,7 @@ int App::run(void)
 			shader.setUniform("specular_shinines", 1.0f);
 			
 			for (auto& model : scene_opaque) {
+				shader.setUniform("transform", model.getTransMatrix(trans));
 				model.Draw(shader);
 			}
 			// - Draw transparent objects
@@ -151,6 +149,7 @@ int App::run(void)
 			glDepthMask(GL_FALSE);      // set Z to read-only
 			// TODO: sort by distance from camera, from far to near
 			for (auto& model : scene_transparent) {
+				shader.setUniform("transform", model.getTransMatrix(trans));
 				model.Draw(shader);
 			}
 			glDisable(GL_BLEND);
@@ -191,18 +190,9 @@ void App::init_assets()
 	// load models, load textures, load shaders, initialize level, etc...
 	shader = Shader(VS_PATH, FS_PATH);
 
-	//std::filesystem::path model_path("./resources/obj/bunny_tri_vnt.obj");
-	std::filesystem::path model_path("./resources/obj/cube_triangles_normals_tex.obj");
-	//std::filesystem::path model_path("./resources/obj/plane_tri_vnt.obj");
-	//std::filesystem::path model_path("./resources/obj/sphere_tri_vnt.obj");
-	//std::filesystem::path model_path("./resources/obj/teapot_tri_vnt.obj");
-	std::filesystem::path tex_path("./resources/textures/box_rgb888.png");
-
-	Model my_model{ model_path, tex_path};
-
 	//scene_test.push_back(my_model);
-	scene_opaque.push_back(Model("./resources/obj/cube_tri_vnt.obj", "./resources/textures/box_rgb888.png"));
-	scene_transparent.push_back(Model("./resources/obj/teapot_tri_vnt.obj", "./resources/textures/Glass.png"));
+	scene_opaque.push_back(Model("./resources/obj/cube_tri_vnt.obj", "./resources/textures/box_rgb888.png", { 5, 2, -3 }));
+	scene_transparent.push_back(Model("./resources/obj/bunny_tri_vnt.obj", "./resources/textures/Glass.png", { 0, 0, 0 }));
 }
 
 void App::report() {
