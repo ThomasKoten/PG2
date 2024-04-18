@@ -1,37 +1,54 @@
 #version 460 core
-
-out vec4 color;
-
+#define MAX_LIGHTS 4
 // Material properties
 uniform vec3 ambient_material, diffuse_material, specular_material;
-uniform float specular_shinines;
+uniform float specular_shininess;
 
-// Texture file from cpp
+// Texture sampler
 uniform sampler2D uTexture;
+
+// Light properties
+uniform int num_lights;
+uniform vec3 light_positions[MAX_LIGHTS];
+uniform vec3 light_colors[MAX_LIGHTS]; // Add light colors
 
 // Input from vertex shader
 in VS_OUT
 {
-	vec3 N;
-	vec3 L;
-	vec3 V;
-	vec2 texCoord;
+    vec3 N; // normal vector
+    vec3 L[MAX_LIGHTS]; // vector from point on object (vertex or rasterized point) towards light source
+    vec3 V; // vector towards viewer
+    vec2 texCoord;
 } fs_in;
 
 void main(void)
 {
-	// Normalize the incoming N, L and V vectors
-	vec3 N = normalize(fs_in.N);
-	vec3 L = normalize(fs_in.L);
-	vec3 V = normalize(fs_in.V);
-	
-	// Calculate R by reflecting -L around the plane defined by N
-	vec3 R = reflect(-L, N);
-	
-	// Calculate the ambient, diffuse and specular contributions
-	vec3 ambient = ambient_material * vec3(1.0);
-	vec3 diffuse = max(dot(N, L), 0.0) * diffuse_material;
-	vec3 specular = pow(max(dot(R, V), 0.0), specular_shinines) * specular_material;
+    // Normalize the incoming normal vector
+    vec3 N = normalize(fs_in.N);
 
-	color = vec4(ambient + diffuse + specular, 1.0) * texture(uTexture, fs_in.texCoord);
+    // Accumulate the contributions from each light source
+    vec3 ambient = ambient_material * vec3(1.0);
+    vec3 diffuse = vec3(0.0);
+    vec3 specular = vec3(0.0);
+
+    for (int i = 0; i < num_lights; i++) {
+        // Normalize the incoming light vector
+        vec3 L = normalize(fs_in.L[i]);
+        
+        // Calculate the reflection vector
+        vec3 R = reflect(-L, N);
+
+        // Calculate the diffuse and specular contributions
+        diffuse += max(dot(N, L), 0.0) * diffuse_material * light_colors[i]; // Multiply diffuse by light color
+        specular += pow(max(dot(R, normalize(fs_in.V)), 0.0), specular_shininess) * specular_material * light_colors[i]; // Multiply specular by light color
+    }
+
+    // Combine ambient, diffuse, and specular components
+    vec3 finalColor = ambient + diffuse + specular;
+
+    // Apply texture
+    vec4 texColor = texture(uTexture, fs_in.texCoord);
+
+    // Final color output
+    gl_FragColor = vec4(finalColor, 1.0) * texColor;
 }

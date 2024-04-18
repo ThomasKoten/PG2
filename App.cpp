@@ -87,9 +87,20 @@ int App::run(void)
 	double previousTime = glfwGetTime();
 	int nbFrames = 0;
 	double elapsedTime;
-	glm::vec3 rgb_orange = { 0.208f, 0.157f, 0.118f };
+
 	glm::vec3 rgb_white = { 1.0f, 1.0f, 1.0f };
 	glm::vec4 rgba_white = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+	std::vector<glm::vec3> light_positions = {
+		glm::vec3(0, 0, 0),
+		glm::vec3(0, 0, 0),
+	};
+
+	std::vector<glm::vec3> light_colors = {
+		glm::vec3(1.0f, 1.0f, 0.0f),
+		glm::vec3(0.0f, 0.0f, 1.0f),
+	};
+
 
 	try {
 		window->update_projection_matrix();
@@ -121,7 +132,6 @@ int App::run(void)
 
 			camera_movement = camera.ProcessInput(window->getWindow(), static_cast<float>(delta_t));
 			camera.Position += camera_movement;
-
 			shader.activate();
 			glm::mat4 trans = glm::mat4(1.0f);
 			//trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -135,10 +145,19 @@ int App::run(void)
 			shader.setUniform("projection", window->getProjection());
 			shader.setUniform("view", view);
 			shader.setUniform("ambient_material", rgb_white);
-			shader.setUniform("diffuse_material", rgb_white);
-			shader.setUniform("specular_material", rgb_white);
-			shader.setUniform("specular_shinines", 1.0f);
-			
+			shader.setUniform("diffuse_material", { 0.7f ,0.7f ,0.7f });
+			shader.setUniform("specular_material", { 0.3f,0.3f ,0.3f });
+			shader.setUniform("specular_shininess", 0.7f);
+			shader.setUniform("num_lights", 2);
+			shader.setUniformArray("light_positions", light_positions);
+			shader.setUniformArray("light_colors", light_colors);
+			/*
+			uniform int num_lights;
+			uniform vec3 light_positions[MAX_LIGHTS];
+			uniform vec3 light_colors[MAX_LIGHTS];
+			*/
+
+
 			for (auto& model : scene_opaque) {
 				shader.setUniform("transform", model.getTransMatrix(trans));
 				model.Draw(shader);
@@ -147,6 +166,12 @@ int App::run(void)
 			glEnable(GL_BLEND);         // enable blending
 			glDisable(GL_CULL_FACE);    // no polygon removal
 			glDepthMask(GL_FALSE);      // set Z to read-only
+
+
+			shader.setUniform("ambient_material", rgb_white);
+			shader.setUniform("diffuse_material", rgb_white);
+			shader.setUniform("specular_material", rgb_white);
+			shader.setUniform("specular_shininess", 1.0f);
 			// TODO: sort by distance from camera, from far to near
 			for (auto& model : scene_transparent) {
 				shader.setUniform("transform", model.getTransMatrix(trans));

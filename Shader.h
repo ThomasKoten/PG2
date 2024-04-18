@@ -40,6 +40,8 @@ public:
 	void setUniform(const std::string& name, const glm::mat3 val);
 	void setUniform(const std::string& name, const glm::mat4 val);
 
+	void setUniformArray(const std::string& name, const std::vector<glm::vec3>& val);
+
 private:
 	GLuint ID{ 0 }; // default = 0, empty shader
 	std::string getShaderInfoLog(const GLuint obj);
