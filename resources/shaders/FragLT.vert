@@ -23,7 +23,7 @@ out VS_OUT
 {
     vec3 N; // normal vector
     vec3 L[MAX_LIGHTS]; // vector from point on object (vertex or rasterized point) towards light source
-    vec3 V; // vector towards viewer
+    vec3 cameraPosition; // Position of the camera in world space
     vec2 texCoord;
 } vs_out;
 
@@ -36,7 +36,7 @@ void main(void)
     vs_out.N = mat3(transpose(inverse(transform))) * aNormal;
 
     // Calculate view vector (direction from the vertex to the camera) in world space
-    vs_out.V = normalize(vec3(view[3]) - worldPos.xyz); // Camera position is extracted from view matrix
+    vs_out.cameraPosition = vec3(view[3]); // Extract camera position from view matrix
 
     // Calculate light vectors and sum up their contributions
     for (int i = 0; i < num_lights; i++) {

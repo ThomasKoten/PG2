@@ -1,5 +1,8 @@
 #version 460 core
+
+// Maximum number of light sources
 #define MAX_LIGHTS 4
+
 // Material properties
 uniform vec3 ambient_material, diffuse_material, specular_material;
 uniform float specular_shininess;
@@ -17,7 +20,7 @@ in VS_OUT
 {
     vec3 N; // normal vector
     vec3 L[MAX_LIGHTS]; // vector from point on object (vertex or rasterized point) towards light source
-    vec3 V; // vector towards viewer
+    vec3 cameraPosition; // Position of the camera in world space
     vec2 texCoord;
 } fs_in;
 
@@ -38,9 +41,12 @@ void main(void)
         // Calculate the reflection vector
         vec3 R = reflect(-L, N);
 
+        // Calculate the view vector in world space
+        vec3 viewVector = normalize(fs_in.cameraPosition - gl_FragCoord.xyz);
+
         // Calculate the diffuse and specular contributions
         diffuse += max(dot(N, L), 0.0) * diffuse_material * light_colors[i]; // Multiply diffuse by light color
-        specular += pow(max(dot(R, normalize(fs_in.V)), 0.0), specular_shininess) * specular_material * light_colors[i]; // Multiply specular by light color
+        specular += pow(max(dot(R, viewVector), 0.0), specular_shininess) * specular_material * light_colors[i]; // Multiply specular by light color
     }
 
     // Combine ambient, diffuse, and specular components

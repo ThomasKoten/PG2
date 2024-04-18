@@ -92,8 +92,8 @@ int App::run(void)
 	glm::vec4 rgba_white = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 	std::vector<glm::vec3> light_positions = {
-		glm::vec3(0, 0, 0),
-		glm::vec3(0, 0, 0),
+		glm::vec3(0, 0, 0), //R->L, U->D, F->B
+		glm::vec3(0, 0, 0), //R->L, U->D, F->B
 	};
 
 	std::vector<glm::vec3> light_colors = {
@@ -106,7 +106,7 @@ int App::run(void)
 		window->update_projection_matrix();
 		glViewport(0, 0, window->getWidth(), window->getHeight());
 
-		camera.Position = glm::vec3(0, 0, 10);
+		camera.Position = glm::vec3(0, 0, 0);
 		double last_frame_time = glfwGetTime();
 		glm::vec3 camera_movement{};
 
@@ -145,9 +145,9 @@ int App::run(void)
 			shader.setUniform("projection", window->getProjection());
 			shader.setUniform("view", view);
 			shader.setUniform("ambient_material", rgb_white);
-			shader.setUniform("diffuse_material", { 0.7f ,0.7f ,0.7f });
-			shader.setUniform("specular_material", { 0.3f,0.3f ,0.3f });
-			shader.setUniform("specular_shininess", 0.7f);
+			shader.setUniform("diffuse_material", { 1.0f ,1.0f ,1.0f });
+			shader.setUniform("specular_material", { 0.7f,0.7f ,0.7f });
+			shader.setUniform("specular_shininess", 1.0f);
 			shader.setUniform("num_lights", 2);
 			shader.setUniformArray("light_positions", light_positions);
 			shader.setUniformArray("light_colors", light_colors);
@@ -216,8 +216,8 @@ void App::init_assets()
 	shader = Shader(VS_PATH, FS_PATH);
 
 	//scene_test.push_back(my_model);
-	scene_opaque.push_back(Model("./resources/obj/cube_tri_vnt.obj", "./resources/textures/box_rgb888.png", { 5, 2, -3 }));
-	scene_transparent.push_back(Model("./resources/obj/bunny_tri_vnt.obj", "./resources/textures/Glass.png", { 0, 0, 0 }));
+	scene_opaque.push_back(Model("./resources/obj/cube_tri_vnt.obj", "./resources/textures/box_rgb888.png", { 2, 2, -2 })); //R->L, U->D, F->B
+	//scene_transparent.push_back(Model("./resources/obj/bunny_tri_vnt.obj", "./resources/textures/Glass.png", { 0, 0, 0 }));
 }
 
 void App::report() {
