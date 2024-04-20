@@ -38,7 +38,7 @@ void Shader::setUniform(const std::string& name, const int val) {
 		std::cerr << "no uniform with name:" << name << '\n';
 		return;
 	}
-	glUniform1f(loc, val);
+	glUniform1i(loc, val);
 }
 
 void Shader::setUniform(const std::string& name, const glm::vec3 val)
@@ -49,6 +49,18 @@ void Shader::setUniform(const std::string& name, const glm::vec3 val)
 		return;
 	}
 	glUniform3fv(loc, 1, glm::value_ptr(val));
+}
+
+void Shader::setUniformArray(const std::string& name, const std::vector<glm::vec3>& val)
+{
+	auto loc = glGetUniformLocation(ID, name.c_str());
+	if (loc == -1) {
+		std::cerr << "No uniform with name: " << name << '\n';
+		return;
+	}
+	for (int i = 0; i < val.size(); ++i) {
+		glUniform3fv(loc + i, 1, glm::value_ptr(val[i]));
+	}
 }
 
 void Shader::setUniform(const std::string& name, const glm::vec4 val) {
