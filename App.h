@@ -61,6 +61,7 @@ private:
 
 	std::vector<Model> scene_opaque;
 	std::vector<Model> scene_transparent;
+	std::vector<Model> scene_heightmap;
 
 };
 

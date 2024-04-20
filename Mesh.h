@@ -9,15 +9,17 @@
 
 #include <glm/glm.hpp> 
 #include <glm/ext.hpp>
+#include <opencv2\opencv.hpp>
 
 class Mesh {
 public:
 
 	// mesh data
 	std::vector<Vertex> vertices;
+	std::vector< glm::vec4 > colors;
 	std::vector<GLuint> indices;
 	GLuint texture_id{ 0 }; // texture id=0  means no texture
-	GLenum primitive_type = GL_POINT;
+	GLenum primitive_type = GL_TRIANGLES;
 
 	// mesh material
 	glm::vec4 diffuse_color{1.0f}; //white, non-transparent 
@@ -34,3 +36,5 @@ private:
 	// ID = 0 is reserved (i.e. uninitalized)
 	unsigned int VAO{ 0 }, VBO{ 0 }, EBO{ 0 }, Tex_ID{ 0 };
 };
+
+

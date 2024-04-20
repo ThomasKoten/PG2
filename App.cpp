@@ -155,11 +155,10 @@ int App::run(void)
 			glDisable(GL_BLEND);
 			glEnable(GL_CULL_FACE);
 			glDepthMask(GL_TRUE);
-
-
-
-
-
+			for (auto& model : scene_heightmap) {
+				shader.setUniform("transform", model.getTransMatrix(trans));
+				model.Draw(shader);
+			}
 
 			// Swap front and back buffers
 			glfwSwapBuffers(window->getWindow());
@@ -193,6 +192,21 @@ void App::init_assets()
 	//scene_test.push_back(my_model);
 	scene_opaque.push_back(Model("./resources/obj/cube_tri_vnt.obj", "./resources/textures/box_rgb888.png", { 5, 2, -3 }));
 	scene_transparent.push_back(Model("./resources/obj/bunny_tri_vnt.obj", "./resources/textures/Glass.png", { 0, 0, 0 }));
+
+	// == MAZE ==
+/*
+cv::Mat maze = cv::Mat(10, 25, CV_8U);
+MazeGenerate(maze);
+/**/
+
+// == HEIGHTMAP ==
+	std::filesystem::path heightspath("./resources/textures/heights.png");
+	std::filesystem::path texturepath("./resources/textures/tex_256.png");
+	auto model = Model(heightspath, texturepath, { 0, 0, 0 }, true);
+	model.position = glm::vec3(1.0f, -2.0f, 1.0f);
+	//model.scale = glm::vec3(0.1f, 0.1f, 0.1f);
+	//model.rotation = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
+	scene_heightmap.push_back( model );
 }
 
 void App::report() {
@@ -213,6 +227,6 @@ void App::report() {
 
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
-	glFrontFace(GL_CCW);
+	glFrontFace(GL_CW);
 	glEnable(GL_DEPTH_TEST);
 }
