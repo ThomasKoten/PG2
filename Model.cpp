@@ -125,9 +125,9 @@ void Model::HeightMap_Load(const std::filesystem::path& hm_file)
 
 			//place vertices and ST to mesh
 			mesh_vertexes.emplace_back(Vertex{ p0,normal, tc0 });
-			mesh_vertexes.emplace_back(Vertex{ p1,normal, tc1 });
-			mesh_vertexes.emplace_back(Vertex{ p2,normal, tc2 });
 			mesh_vertexes.emplace_back(Vertex{ p3, normal,tc3 });
+			mesh_vertexes.emplace_back(Vertex{ p2,normal, tc2 });
+			mesh_vertexes.emplace_back(Vertex{ p1,normal, tc1 });
 
 			// place indices
 			//mesh_vertex_indices.emplace_back(0, 1, 2, 0, 2, 3);

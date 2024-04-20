@@ -157,7 +157,10 @@ int App::run(void)
 			uniform vec3 light_colors[MAX_LIGHTS];
 			*/
 
-
+			for (auto& model : scene_heightmap) {
+				shader.setUniform("transform", model.getTransMatrix(trans));
+				model.Draw(shader);
+			}
 			for (auto& model : scene_opaque) {
 				shader.setUniform("transform", model.getTransMatrix(trans));
 				model.Draw(shader);
@@ -180,10 +183,7 @@ int App::run(void)
 			glDisable(GL_BLEND);
 			glEnable(GL_CULL_FACE);
 			glDepthMask(GL_TRUE);
-			for (auto& model : scene_heightmap) {
-				shader.setUniform("transform", model.getTransMatrix(trans));
-				model.Draw(shader);
-			}
+			
 
 			// Swap front and back buffers
 			glfwSwapBuffers(window->getWindow());
@@ -252,6 +252,6 @@ void App::report() {
 
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
-	glFrontFace(GL_CW);
+	glFrontFace(GL_CCW);
 	glEnable(GL_DEPTH_TEST);
 }
