@@ -14,6 +14,10 @@ public:
 	Model(const std::filesystem::path& filename, const std::filesystem::path& path_tex, glm::vec3 obj_position, bool is_height_map = false);
 	glm::mat4 getTransMatrix(glm::mat4 trans);
 	void Draw(Shader& shader);
+	const unsigned int mesh_step_size = 10;
+	float center_x;
+	float height_y;
+	float center_z;
 
 private:
 	std::vector<Mesh> meshes;

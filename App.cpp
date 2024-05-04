@@ -216,7 +216,7 @@ void App::init_assets()
 
 	//scene_test.push_back(my_model);
 	scene_opaque.push_back(Model("./resources/obj/cube_tri_vnt.obj", "./resources/textures/box_rgb888.png", { 5, 2, -3 }));
-	scene_transparent.push_back(Model("./resources/obj/bunny_tri_vnt.obj", "./resources/textures/Glass.png", { 0, 0, 0 }));
+	scene_transparent.push_back(Model("./resources/obj/bunny_tri_vnt.obj", "./resources/textures/Glass.png", { 2.0f, -2.0f, 8.0f }));
 
 	// == MAZE ==
 /*
@@ -227,8 +227,8 @@ MazeGenerate(maze);
 // == HEIGHTMAP ==
 	std::filesystem::path heightspath("./resources/textures/heights.png");
 	std::filesystem::path texturepath("./resources/textures/tex_256.png");
-	auto model = Model(heightspath, texturepath, { 0, 0, 0 }, true);
-	model.position = glm::vec3(1.0f, -2.0f, 1.0f);
+	auto model = Model(heightspath, texturepath, {0, -250, -100 }, true);
+	//model.position = glm::vec3(1.0f, -2.0f, 1.0f);
 	//model.scale = glm::vec3(0.1f, 0.1f, 0.1f);
 	//model.rotation = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
 	scene_heightmap.push_back( model );

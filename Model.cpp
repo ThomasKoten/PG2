@@ -14,6 +14,7 @@ Model::Model(const std::filesystem::path& filename, const std::filesystem::path&
 	else {
 		HeightMap_Load(filename);
 		GLuint texture_id = textureInit(path_tex.string().c_str());
+		position= glm::vec3(-center_x, -250, -center_z);
 		Mesh mesh = Mesh(GL_TRIANGLES, mesh_vertexes, mesh_vertex_indices, texture_id);
 		meshes.push_back(mesh);
 	}
@@ -65,11 +66,6 @@ void Model::HeightMap_Load(const std::filesystem::path& hm_file)
 
 	cv::Mat hmap = cv::imread(hm_file.u8string(), cv::IMREAD_GRAYSCALE);
 
-
-	glm::vec3 v;
-	glm::vec4 c;
-	const unsigned int mesh_step_size = 10;
-
 	if (hmap.empty())
 	{
 		std::cerr << "ERR: Height map empty? File:" << hm_file << std::endl;
@@ -107,6 +103,8 @@ void Model::HeightMap_Load(const std::filesystem::path& hm_file)
 			// Get The (X, Y, Z) Value For The Top Left Vertex = 3
 			glm::vec3 p3(x_coord, hmap.at<uchar>(cv::Point(x_coord, z_coord + mesh_step_size)), z_coord + mesh_step_size);
 
+			normal = glm::normalize(glm::cross(p1 - p0, p2 - p0));
+
 			// Get max normalized height for tile, set texture accordingly
 			// Grayscale image returns 0..256, normalize to 0.0f..1.0f by dividing by 256
 			float max_h = std::max(hmap.at<uchar>(cv::Point(x_coord, z_coord)) / 256.0f,
@@ -117,11 +115,11 @@ void Model::HeightMap_Load(const std::filesystem::path& hm_file)
 
 			// Get texture coords in vertices, bottom left of geometry == bottom left of texture
 			glm::vec2 tc0 = getSubtexByHeight(max_h);
-			glm::vec2 tc1 = tc0 + glm::vec2(1.0f / 16, 0.0f);			//add offset for bottom right corner
+			glm::vec2 tc1 = tc0 + glm::vec2(1.0f / 16, 0.0f);		//add offset for bottom right corner
 			glm::vec2 tc2 = tc0 + glm::vec2(1.0f / 16, 1.0f / 16);  //add offset for top right corner
 			glm::vec2 tc3 = tc0 + glm::vec2(0.0f, 1.0f / 16);       //add offset for bottom leftcorner
 
-			normal = glm::normalize(glm::cross(p1 - p0, p2 - p0));
+			
 
 			//place vertices and ST to mesh
 			mesh_vertexes.emplace_back(Vertex{ p0,normal, tc0 });
@@ -142,6 +140,8 @@ void Model::HeightMap_Load(const std::filesystem::path& hm_file)
 
 		}
 	}
+	center_x = (hmap.cols - mesh_step_size) / 2.0f;
+	center_z = (hmap.rows - mesh_step_size) / 2.0f;
 	std::cout << "Heightmap size:" << hmap.size << std::endl;
 
 }
@@ -156,14 +156,13 @@ glm::vec2 Model::getSubtexST(const int x, const int y)
 glm::vec2 Model::getSubtexByHeight(float height)
 {
 	if (height > 0.9)
-		return getSubtexST(2, 11); //snow
+		return getSubtexST(2, 3); //snow
 	else if (height > 0.8)
-		return getSubtexST(3, 11); //ice
+		return getSubtexST(8, 0); //ice
 	else if (height > 0.5)
-		return getSubtexST(0, 14); //rock
+		return getSubtexST(13, 3); //rock
 	else if (height > 0.3)
-		return getSubtexST(2, 15); //soil
+		return getSubtexST(10, 4); //soil
 	else
-		return getSubtexST(0, 11); //grass
+		return getSubtexST(6, 4); //grass
 }
-
