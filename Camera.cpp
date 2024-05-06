@@ -15,11 +15,10 @@ glm::mat4 Camera::GetViewMatrix()
 glm::vec3 Camera::ProcessInput(GLFWwindow* window, GLfloat deltaTime)
 {
 	glm::vec3 direction(0, 0, 0);
-	glm::vec3 zero(0, 0, 0);
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		direction += Front;
-
+		
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 		direction += -Front;
 
@@ -37,7 +36,7 @@ glm::vec3 Camera::ProcessInput(GLFWwindow* window, GLfloat deltaTime)
 
 	//Testovat zlv·öù prvky, jestli nenÌ p¯ek·ûka
 
-	return direction == zero ? zero : glm::normalize(direction) * MovementSpeed * deltaTime;
+	return direction == glm::vec3(0) ? direction : glm::normalize(direction) * MovementSpeed * deltaTime;
 }
 
 void Camera::ProcessMouseMovement(GLfloat xoffset, GLfloat yoffset, GLboolean constraintPitch)

@@ -132,6 +132,9 @@ int App::run(void)
 
 			camera_movement = camera.ProcessInput(window->getWindow(), static_cast<float>(delta_t));
 			camera.Position += camera_movement;
+			float terrain_height = scene_heightmap[0].GetHeightAtPosition(camera.Position.x, camera.Position.z);
+			camera.Position.y = terrain_height; //Zakomentovat pro "no_clip"
+
 			shader.activate();
 			glm::mat4 trans = glm::mat4(1.0f);
 			//trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -215,19 +218,13 @@ void App::init_assets()
 	shader = Shader(VS_PATH, FS_PATH);
 
 	//scene_test.push_back(my_model);
-	scene_opaque.push_back(Model("./resources/obj/cube_tri_vnt.obj", "./resources/textures/box_rgb888.png", { 5, 2, -3 }));
-	scene_transparent.push_back(Model("./resources/obj/bunny_tri_vnt.obj", "./resources/textures/Glass.png", { 2.0f, -2.0f, 8.0f }));
-
-	// == MAZE ==
-/*
-cv::Mat maze = cv::Mat(10, 25, CV_8U);
-MazeGenerate(maze);
-/**/
+	scene_opaque.push_back(Model("./resources/obj/cube_tri_vnt.obj", "./resources/textures/box_rgb888.png", { 5.0f, 260.0f, -3.0f }));
+	scene_transparent.push_back(Model("./resources/obj/bunny_tri_vnt.obj", "./resources/textures/Glass.png", { 2.0f, 240.0f, 8.0f }));
 
 // == HEIGHTMAP ==
 	std::filesystem::path heightspath("./resources/textures/heights.png");
 	std::filesystem::path texturepath("./resources/textures/tex_256.png");
-	auto model = Model(heightspath, texturepath, {0, -250, -100 }, true);
+	auto model = Model(heightspath, texturepath, {0.0f,0.0f, 0.0f }, true);
 	//model.position = glm::vec3(1.0f, -2.0f, 1.0f);
 	//model.scale = glm::vec3(0.1f, 0.1f, 0.1f);
 	//model.rotation = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);

@@ -14,7 +14,7 @@ Model::Model(const std::filesystem::path& filename, const std::filesystem::path&
 	else {
 		HeightMap_Load(filename);
 		GLuint texture_id = textureInit(path_tex.string().c_str());
-		position= glm::vec3(-center_x, -250, -center_z);
+		position = glm::vec3(-center_x, position.y, -center_z);
 		Mesh mesh = Mesh(GL_TRIANGLES, mesh_vertexes, mesh_vertex_indices, texture_id);
 		meshes.push_back(mesh);
 	}
@@ -64,7 +64,7 @@ void Model::HeightMap_Load(const std::filesystem::path& hm_file)
 	mesh_vertexes.clear();
 	mesh_vertex_indices.clear();
 
-	cv::Mat hmap = cv::imread(hm_file.u8string(), cv::IMREAD_GRAYSCALE);
+	hmap = cv::imread(hm_file.u8string(), cv::IMREAD_GRAYSCALE);
 
 	if (hmap.empty())
 	{
@@ -119,7 +119,7 @@ void Model::HeightMap_Load(const std::filesystem::path& hm_file)
 			glm::vec2 tc2 = tc0 + glm::vec2(1.0f / 16, 1.0f / 16);  //add offset for top right corner
 			glm::vec2 tc3 = tc0 + glm::vec2(0.0f, 1.0f / 16);       //add offset for bottom leftcorner
 
-			
+
 
 			//place vertices and ST to mesh
 			mesh_vertexes.emplace_back(Vertex{ p0,normal, tc0 });
@@ -129,7 +129,7 @@ void Model::HeightMap_Load(const std::filesystem::path& hm_file)
 
 			// place indices
 			//mesh_vertex_indices.emplace_back(0, 1, 2, 0, 2, 3);
-			// place indices
+
 			indices_counter += 4;
 			mesh_vertex_indices.emplace_back(indices_counter - 4);
 			mesh_vertex_indices.emplace_back(indices_counter - 3);
@@ -142,6 +142,7 @@ void Model::HeightMap_Load(const std::filesystem::path& hm_file)
 	}
 	center_x = (hmap.cols - mesh_step_size) / 2.0f;
 	center_z = (hmap.rows - mesh_step_size) / 2.0f;
+
 	std::cout << "Heightmap size:" << hmap.size << std::endl;
 
 }
@@ -156,13 +157,45 @@ glm::vec2 Model::getSubtexST(const int x, const int y)
 glm::vec2 Model::getSubtexByHeight(float height)
 {
 	if (height > 0.9)
-		return getSubtexST(2, 3); //snow
+		return getSubtexST(2, 4); //snow
 	else if (height > 0.8)
-		return getSubtexST(8, 0); //ice
+		return getSubtexST(2, 3); //ice
 	else if (height > 0.5)
-		return getSubtexST(13, 3); //rock
+		return getSubtexST(10, 6); //rock
 	else if (height > 0.3)
 		return getSubtexST(10, 4); //soil
 	else
 		return getSubtexST(6, 4); //grass
+}
+float Model::GetHeightAtPosition(float x, float z) const
+{
+	// Adjust for terrain position and scale if necessary
+	x += center_x;
+	z += center_z;
+
+	int x_index = static_cast<int>(x);
+	int z_index = static_cast<int>(z);
+
+	// Ensure x and z are within valid terrain bounds
+	if (x_index < 0 || x_index >= hmap.cols - 1 || z_index < 0 || z_index >= hmap.rows - 1) {
+		return 0.0f;
+	}
+
+	float x_frac = x - static_cast<float>(x_index);
+	float z_frac = z - static_cast<float>(z_index);
+
+	// Sample heights of four surrounding points
+	float height00 = static_cast<float>(hmap.at<uchar>(z_index, x_index));
+	float height10 = static_cast<float>(hmap.at<uchar>(z_index, x_index + 1));
+	float height01 = static_cast<float>(hmap.at<uchar>(z_index + 1, x_index));
+	float height11 = static_cast<float>(hmap.at<uchar>(z_index + 1, x_index + 1));
+
+	// Bilinear interpolation
+	float height_interp =
+		height00 * (1.0f - x_frac) * (1.0f - z_frac)
+		+ height10 * x_frac * (1.0f - z_frac)
+		+ height01 * (1.0f - x_frac) * z_frac
+		+ height11 * x_frac * z_frac;
+
+	return height_interp + camera_height;
 }
