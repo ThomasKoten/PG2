@@ -17,13 +17,6 @@
 
 App app;
 
-void ahoj(int num) {
-	for (size_t i = 0; i < num; i++)
-	{
-		std::cout << "ahoj" << '\n';
-	}
-}
-
 void getFPS(GLFWwindow* window) {
 	double previousTime = glfwGetTime();
 	int nbFrames = 0;

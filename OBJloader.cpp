@@ -156,7 +156,6 @@ std::vector<Vertex> make_Vertexes(std::vector<glm::vec3> vertices, std::vector<g
 	return out_vertex;
 }
 
-//Thank @Radek_Mocek
 std::vector<std::string> FillFileLines(const std::filesystem::path& file_name)
 {
 	std::string file_line;

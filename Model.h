@@ -11,15 +11,14 @@ public:
 	glm::vec3 scale{};
 	glm::vec4 rotation{}; // axes xyz + angle
 
-	Model(const std::filesystem::path& filename, const std::filesystem::path& path_tex, glm::vec3 obj_position, bool is_height_map = false);
-	glm::mat4 getTransMatrix(glm::mat4 trans);
+	Model(const std::filesystem::path& filename, const std::filesystem::path& path_tex, glm::vec3 obj_position, float scale = 1.0f, glm::vec4 rotation = { 0.0f, 1.0f, 0.0f, 0.0f }, bool is_height_map = false);
+	glm::mat4 getTransMatrix();
 	void Draw(Shader& shader);
 	float GetHeightAtPosition(float x, float z) const;
 	const unsigned int mesh_step_size = 10;
 	float center_x;
 	float center_z;
 	cv::Mat hmap;
-	float camera_height = 18.0;
 
 private:
 	std::vector<Mesh> meshes;

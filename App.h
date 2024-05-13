@@ -56,6 +56,7 @@ private:
 	std::unordered_map<std::string, Mesh> scene;
 
 	static Camera camera;
+	float camera_height = 18.0;
 	static double last_cursor_xpos;
 	static double last_cursor_ypos;
 

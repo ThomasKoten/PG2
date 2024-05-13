@@ -2,12 +2,13 @@
 #include "Texture.h"
 #include "Mesh.h"
 
-Model::Model(const std::filesystem::path& filename, const std::filesystem::path& path_tex, glm::vec3 obj_position, bool is_height_map) {
-	std::filesystem::path file_ext = filename.extension();
-	position = obj_position;
+Model::Model(const std::filesystem::path& filename, const std::filesystem::path& path_tex, glm::vec3 obj_position, float obj_scale, glm::vec4 obj_rotation, bool is_height_map)
+	:scale(obj_scale),
+	rotation(obj_rotation) {
 	if (!is_height_map) {
 		LoadOBJFile(filename);
 		GLuint texture_id = textureInit(path_tex.string().c_str());
+		position = obj_position;
 		Mesh mesh = Mesh(GL_TRIANGLES, mesh_vertexes, mesh_vertex_indices, texture_id);
 		meshes.push_back(mesh);
 	}
@@ -28,15 +29,15 @@ void Model::Draw(Shader& shader) {
 	}
 }
 
-glm::mat4 Model::getTransMatrix(glm::mat4 trans) {
-	//glm::mat4 model = glm::identity<glm::mat4>();
+glm::mat4 Model::getTransMatrix() {
+	glm::mat4 model = glm::identity<glm::mat4>();
 
-	//model=glm::translate(trans, position);
-	//model=glm::scale(trans, scale);
-	//rotation_axes = glm::vec3(rotation.x, rotation.y, rotation.z);
-	//model=glm::rotate(trans, glm::radians(rotation.w), rotation_axes);
-	//return model;
-	return glm::translate(trans, position);
+	model = glm::translate(model, position);
+	model = glm::scale(model, glm::vec3(scale));
+	rotation_axes = glm::vec3(rotation.x, rotation.y, rotation.z);
+	model = glm::rotate(model, glm::radians(rotation.w), rotation_axes);
+	return model;
+
 }
 
 
@@ -140,8 +141,8 @@ void Model::HeightMap_Load(const std::filesystem::path& hm_file)
 
 		}
 	}
-	center_x = (hmap.cols - mesh_step_size) / 2.0f;
-	center_z = (hmap.rows - mesh_step_size) / 2.0f;
+	center_x = (hmap.cols - mesh_step_size) / 2.0;
+	center_z = (hmap.rows - mesh_step_size) / 2.0;
 
 	std::cout << "Heightmap size:" << hmap.size << std::endl;
 
@@ -197,5 +198,5 @@ float Model::GetHeightAtPosition(float x, float z) const
 		+ height01 * (1.0f - x_frac) * z_frac
 		+ height11 * x_frac * z_frac;
 
-	return height_interp + camera_height;
+	return height_interp;
 }
