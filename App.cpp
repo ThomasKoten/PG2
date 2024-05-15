@@ -3,6 +3,7 @@
 #include "Model.h"
 #include "Shader.h"
 #include <opencv2\opencv.hpp>
+#include <cmath>
 
 void getString(const std::string name, GLenum symb_const) {
 	const char* mystring = (const char*)glGetString(symb_const);
@@ -106,7 +107,7 @@ int App::run(void)
 		window->update_projection_matrix();
 		glViewport(0, 0, window->getWidth(), window->getHeight());
 
-		camera.Position = glm::vec3(0, 0, 0);
+		camera.Position = glm::vec3(0, 270, 0);
 		double last_frame_time = glfwGetTime();
 		glm::vec3 camera_movement{};
 
@@ -141,7 +142,7 @@ int App::run(void)
 
 			//glm::mat4 projection = glm::mat4(1.0f);
 			//projection = glm::perspective(glm::radians(60.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
-			
+
 			shader.setUniform("projection", window->getProjection());
 			shader.setUniform("view", view);
 			shader.setUniform("ambient_material", rgb_white);
@@ -161,6 +162,13 @@ int App::run(void)
 				shader.setUniform("transform", model.getTransMatrix());
 				model.Draw(shader);
 			}
+
+			double time = glfwGetTime();
+			float radius = 100.0f;
+			float speed = 2.0f;
+
+			flyingBird(scene_opaque[1], time, radius, speed);
+
 			for (auto& model : scene_opaque) {
 				shader.setUniform("transform", model.getTransMatrix());
 				model.Draw(shader);
@@ -183,7 +191,7 @@ int App::run(void)
 			glDisable(GL_BLEND);
 			glEnable(GL_CULL_FACE);
 			glDepthMask(GL_TRUE);
-			
+
 
 			// Swap front and back buffers
 			glfwSwapBuffers(window->getWindow());
@@ -216,13 +224,14 @@ void App::init_assets()
 
 	//scene_test.push_back(my_model);
 	scene_opaque.push_back(Model("./resources/obj/cube_tri_vnt.obj", "./resources/textures/box_rgb888.png", { 5.0f, 260.0f, -3.0f }));
+	scene_opaque.push_back(Model("./resources/obj/condor.obj", "./resources/textures/condor.tif", { 0.0f, 260.0f, 0.0f }, 30.0f));
 	scene_transparent.push_back(Model("./resources/obj/bunny_tri_vnt.obj", "./resources/textures/Glass.png", { 2.0f, 240.0f, 8.0f }, 1.0f, { 1.0f, 0.0f, 0.0f, -20.0f }));
 
-// == HEIGHTMAP ==
+	// == HEIGHTMAP ==
 	std::filesystem::path heightspath("./resources/textures/heights.png");
 	std::filesystem::path texturepath("./resources/textures/tex_256.png");
 	auto model = Model(heightspath, texturepath, { 0.0f,0.0f, 0.0f }, 1.0f, { 0.0f, 1.0f, 0.0f, 0.0f }, true);
-	scene_heightmap.push_back( model );
+	scene_heightmap.push_back(model);
 }
 
 void App::report() {
@@ -246,3 +255,21 @@ void App::report() {
 	glFrontFace(GL_CCW);
 	glEnable(GL_DEPTH_TEST);
 }
+
+void App::flyingBird(Model& bird, float time, float radius, float speed) {
+	float x = radius * cos(speed * time);
+	float z = radius * sin(speed * time);
+
+	glm::vec3 direction = glm::normalize(glm::vec3(speed * x, 0.0f, -speed * z));
+
+	// Calculate orientation angle
+	float angle = atan2(direction.z, direction.x);
+	float angle_deg = glm::degrees(angle);
+
+	// Update model orientation
+	bird.rotation.w = angle_deg;
+	//Update model position
+	bird.position = glm::vec3(x, bird.position.y, z);
+
+}
+

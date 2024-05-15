@@ -38,6 +38,7 @@ public:
 	void glew_register_callback();
 
 	static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos);
+	void flyingBird(Model& bird, float time, float radius, float speed);
 
 	void report();
 	void init_assets();
