@@ -1,10 +1,9 @@
-#include <opencv2\opencv.hpp>
 #include "Texture.h"
 
 GLuint textureInit(const char* filepath)
 {
 	cv::Mat image = cv::imread(filepath, cv::IMREAD_UNCHANGED);
-	if (image.empty()){
+	if (image.empty()) {
 		std::cerr << "no texture: " << filepath << std::endl;
 		exit(1);
 	}
@@ -106,4 +105,24 @@ GLuint tex_gen(cv::Mat& image)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); //trilinear minifying
 
 	return texture;
+}
+
+GLuint createSolidColorTexture(const glm::vec3& color) {
+	GLuint texture_id;
+	glGenTextures(1, &texture_id);
+	glBindTexture(GL_TEXTURE_2D, texture_id);
+
+	// Create a 1x1 pixel texture with the specified color
+	unsigned char data[3] = {
+		static_cast<unsigned char>(color.r * 255),
+		static_cast<unsigned char>(color.g * 255),
+		static_cast<unsigned char>(color.b * 255)
+	};
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	return texture_id;
 }

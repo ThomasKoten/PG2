@@ -1,22 +1,20 @@
+#include <numeric>
 #include "Model.h"
 #include "Texture.h"
 #include "Mesh.h"
 
-Model::Model(const std::filesystem::path& filename, const std::filesystem::path& path_tex, glm::vec3 obj_position, float obj_scale, glm::vec4 obj_rotation, bool is_height_map)
+Model::Model(const std::filesystem::path& path_obj, const std::filesystem::path& path_tex, glm::vec3 obj_position, float obj_scale, glm::vec4 obj_rotation, bool is_height_map)
 	:scale(obj_scale),
-	rotation(obj_rotation) {
+	rotation(obj_rotation),
+	position(obj_position) {
 	if (!is_height_map) {
-		LoadOBJFile(filename);
-		GLuint texture_id = textureInit(path_tex.string().c_str());
-		position = obj_position;
-		Mesh mesh = Mesh(GL_TRIANGLES, mesh_vertexes, mesh_vertex_indices, texture_id);
-		meshes.push_back(mesh);
+		LoadOBJFile(path_obj, path_tex);
 	}
 	else {
-		HeightMap_Load(filename);
+		HeightMap_Load(path_obj);
 		GLuint texture_id = textureInit(path_tex.string().c_str());
 		position = glm::vec3(-center_x, position.y, -center_z);
-		Mesh mesh = Mesh(GL_TRIANGLES, mesh_vertexes, mesh_vertex_indices, texture_id);
+		Mesh mesh = Mesh(GL_TRIANGLES, mesh_vertexes, mesh_indices, texture_id);
 		meshes.push_back(mesh);
 	}
 	// TODO: call LoadOBJFile, LoadMTLFile, process data, create mesh and set its properties 
@@ -42,20 +40,52 @@ glm::mat4 Model::getTransMatrix() {
 
 
 
-void Model::LoadOBJFile(const std::filesystem::path& filename)
+void Model::LoadOBJFile(const std::filesystem::path& path_obj, const std::filesystem::path& path_tex)
 {
 
 	std::vector< glm::vec3 > vertices, normals;
 	std::vector< glm::vec2 > uvs;
-	bool res = loadOBJ(filename.string().c_str(), vertices, uvs, normals);
-	if (res) {
-		mesh_vertexes = make_Vertexes(vertices, normals, uvs);
-		for (unsigned int i = 0; i < vertices.size(); ++i) {
-			mesh_vertex_indices.push_back(i);
+
+	MTLloader mtlLoader;
+	bool hasMaterials = (path_tex.extension() == ".mtl");
+	if (hasMaterials) {
+		materials = mtlLoader.loadMTL(path_tex.string().c_str());
+	}
+
+	bool res = loadOBJ(path_obj.string().c_str(), vertices, uvs, normals, materials);
+
+	if (!res) {
+		std::cout << "Loading OBJ file failed." << std::endl;
+		return;
+	}
+	if (hasMaterials) {
+		for (const auto& material : materials) {
+			auto mesh_vertexes = make_Vertexes(material.mat_vertices, material.mat_normals, material.mat_uvs);
+			std::vector<unsigned int> mesh_indices(material.mat_vertices.size());
+			std::iota(mesh_indices.begin(), mesh_indices.end(), 0);
+
+			GLuint texture_id;
+			// Create a solid color texture or use a default texture
+			if (material.texturePath.empty()) {
+				texture_id = createSolidColorTexture(material.diffuseColor);
+			}
+			else {
+				texture_id = textureInit(material.texturePath.c_str());
+			}
+
+			Mesh mesh = Mesh(GL_TRIANGLES, mesh_vertexes, mesh_indices, texture_id);
+			meshes.push_back(mesh);
 		}
+
 	}
 	else {
-		std::cout << "Nacteni souboru OBJ se nepovedlo." << '\n';
+		auto mesh_vertexes = make_Vertexes(vertices, normals, uvs);
+		std::vector<unsigned int> mesh_indices(vertices.size());
+		std::iota(mesh_indices.begin(), mesh_indices.end(), 0);
+
+		GLuint texture_id = textureInit(path_tex.string().c_str());
+		Mesh mesh = Mesh(GL_TRIANGLES, mesh_vertexes, mesh_indices, texture_id);
+		meshes.push_back(mesh);
 	}
 }
 
@@ -63,7 +93,7 @@ void Model::HeightMap_Load(const std::filesystem::path& hm_file)
 {
 
 	mesh_vertexes.clear();
-	mesh_vertex_indices.clear();
+	mesh_indices.clear();
 
 	hmap = cv::imread(hm_file.u8string(), cv::IMREAD_GRAYSCALE);
 
@@ -129,15 +159,15 @@ void Model::HeightMap_Load(const std::filesystem::path& hm_file)
 			mesh_vertexes.emplace_back(Vertex{ p1,normal, tc1 });
 
 			// place indices
-			//mesh_vertex_indices.emplace_back(0, 1, 2, 0, 2, 3);
+			//mesh_indices.emplace_back(0, 1, 2, 0, 2, 3);
 
 			indices_counter += 4;
-			mesh_vertex_indices.emplace_back(indices_counter - 4);
-			mesh_vertex_indices.emplace_back(indices_counter - 3);
-			mesh_vertex_indices.emplace_back(indices_counter - 2);
-			mesh_vertex_indices.emplace_back(indices_counter - 4);
-			mesh_vertex_indices.emplace_back(indices_counter - 2);
-			mesh_vertex_indices.emplace_back(indices_counter - 1);
+			mesh_indices.emplace_back(indices_counter - 4);
+			mesh_indices.emplace_back(indices_counter - 3);
+			mesh_indices.emplace_back(indices_counter - 2);
+			mesh_indices.emplace_back(indices_counter - 4);
+			mesh_indices.emplace_back(indices_counter - 2);
+			mesh_indices.emplace_back(indices_counter - 1);
 
 		}
 	}

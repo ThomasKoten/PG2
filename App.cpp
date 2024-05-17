@@ -224,7 +224,7 @@ void App::init_assets()
 
 	//scene_test.push_back(my_model);
 	scene_opaque.push_back(Model("./resources/obj/cube_tri_vnt.obj", "./resources/textures/box_rgb888.png", { 5.0f, 260.0f, -3.0f }));
-	scene_opaque.push_back(Model("./resources/obj/condor.obj", "./resources/textures/condor.tif", { 0.0f, 260.0f, 0.0f }, 30.0f));
+	scene_opaque.push_back(Model("./resources/gull/gull.obj", "./resources/gull/gull.mtl", { 0.0f, 260.0f, 0.0f }, 30.0f));
 	scene_transparent.push_back(Model("./resources/obj/bunny_tri_vnt.obj", "./resources/textures/Glass.png", { 2.0f, 240.0f, 8.0f }, 1.0f, { 1.0f, 0.0f, 0.0f, -20.0f }));
 
 	// == HEIGHTMAP ==

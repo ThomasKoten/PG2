@@ -4,8 +4,8 @@
 
 // indirect (indexed) draw 
 
-Mesh::Mesh(GLenum primitive_type, std::vector<Vertex>& vertices, std::vector<GLuint>& indices, GLuint texture_id) :
-	primitive_type(primitive_type),
+Mesh::Mesh(GLenum draw_mode, std::vector<Vertex>& vertices, std::vector<GLuint>& indices, GLuint texture_id) :
+	draw_mode(draw_mode),
 	vertices(vertices),
 	indices(indices),
 	Tex_ID(texture_id)
@@ -75,7 +75,7 @@ void Mesh::clear(void) {
 	vertices.clear();
 	indices.clear();
 	Tex_ID = 0;
-	primitive_type = GL_POINT;
+	draw_mode = GL_POINT;
 
 	glDeleteBuffers(1, &VBO);
 	glDeleteVertexArrays(1, &VAO);

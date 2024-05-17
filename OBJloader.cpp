@@ -10,22 +10,21 @@
 
 #define MAX_LINE_SIZE 255
 
-bool loadOBJ(const char* path, std::vector < glm::vec3 >& out_vertices, std::vector < glm::vec2 >& out_uvs, std::vector < glm::vec3 >& out_normals)
+bool loadOBJ(const char* path, std::vector < glm::vec3 >& out_vertices, std::vector < glm::vec2 >& out_uvs, std::vector < glm::vec3 >& out_normals, std::vector<Material>& materials)
 {
 	auto file_lines = FillFileLines(path);
 
-	std::vector< unsigned int > vertexIndices, uvIndices, normalIndices;
+	std::vector< unsigned int > vertexIndices, uvIndices, normalIndices, MVI, MUI, MNI;
 	std::vector< glm::vec3 > temp_vertices;
 	std::vector< glm::vec2 > temp_uvs;
 	std::vector< glm::vec3 > temp_normals;
 
-	std::string first_two_chars, first_three_chars;
+	std::string first_two_chars, first_three_chars, materialName;
 	bool line_success;
 
 	out_vertices.clear();
 	out_uvs.clear();
 	out_normals.clear();
-
 
 
 	for (const std::string& line : file_lines) {
@@ -49,6 +48,13 @@ bool loadOBJ(const char* path, std::vector < glm::vec3 >& out_vertices, std::vec
 				glm::vec3 normal;
 				sscanf_s(line.c_str(), "vn %f %f %f", &normal.x, &normal.y, &normal.z);
 				temp_normals.push_back(normal);
+			}
+			else if (line.substr(0, 6) == "usemtl") {
+				materialName = line.substr(7);
+				std::cout << materialName << vertexIndices.size() << std::endl;
+				MVI.push_back(vertexIndices.size());
+				MUI.push_back(uvIndices.size());
+				MNI.push_back(normalIndices.size());
 			}
 			else if (first_two_chars == "f ") {
 				auto slashes = std::count(line.begin(), line.end(), '/');
@@ -114,6 +120,32 @@ bool loadOBJ(const char* path, std::vector < glm::vec3 >& out_vertices, std::vec
 			if (!line_success && first_two_chars != "# ") {
 				std::cout << "LoadOBJFile: Ignoring line '" << line << "' in file" << path << std::endl;
 			}
+		}
+	}
+	MVI.push_back(vertexIndices.size());
+	MUI.push_back(uvIndices.size());
+	MNI.push_back(normalIndices.size());
+
+	//Populating vectors for each material
+	for (size_t m = 0; m < materials.size(); ++m) {
+		size_t startVI = MVI[m];
+		size_t endVI = MVI[m + 1];
+		size_t startUI = MUI[m];
+		size_t endUI = MUI[m + 1];
+		size_t startNI = MNI[m];
+		size_t endNI = MNI[m + 1];
+
+		for (size_t i = startVI; i < endVI; ++i) {
+			unsigned int vertexIndex = vertexIndices[i];
+			materials[m].mat_vertices.push_back(temp_vertices[vertexIndex - 1]);
+		}
+		for (size_t i = startUI; i < endUI; ++i) {
+			unsigned int uvIndex = uvIndices[i];
+			materials[m].mat_uvs.push_back(temp_uvs[uvIndex - 1]);
+		}
+		for (size_t i = startNI; i < endNI; ++i) {
+			unsigned int normalIndex = normalIndices[i];
+			materials[m].mat_normals.push_back(temp_normals[normalIndex - 1]);
 		}
 	}
 

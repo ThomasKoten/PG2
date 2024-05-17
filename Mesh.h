@@ -19,13 +19,13 @@ public:
 	std::vector< glm::vec4 > colors;
 	std::vector<GLuint> indices;
 	GLuint texture_id{ 0 }; // texture id=0  means no texture
-	GLenum primitive_type = GL_TRIANGLES;
+	GLenum draw_mode = GL_TRIANGLES;
 
 	// mesh material
 	glm::vec4 diffuse_color{1.0f}; //white, non-transparent 
 
 	// indirect (indexed) draw 
-	Mesh(GLenum primitive_type, std::vector<Vertex>& vertices, std::vector<GLuint>& indices, GLuint texture_id);
+	Mesh(GLenum draw_mode, std::vector<Vertex>& vertices, std::vector<GLuint>& indices, GLuint texture_id);
 
 	void Draw(Shader& shader);
 
