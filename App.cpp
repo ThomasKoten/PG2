@@ -89,19 +89,45 @@ int App::run(void)
 	int nbFrames = 0;
 	double elapsedTime;
 
-	glm::vec3 rgb_white = { 1.0f, 1.0f, 1.0f };
+	glm::vec3 rgb_white = { 0.2f, 0.2f, 0.2f };
 	glm::vec4 rgba_white = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-	std::vector<glm::vec3> light_positions = {
-		glm::vec3(0, 0, 0), //R->L, U->D, F->B
-		glm::vec3(0, 0, 0), //R->L, U->D, F->B
-	};
 
-	std::vector<glm::vec3> light_colors = {
-		glm::vec3(1.0f, 1.0f, 0.0f),
+	//POINT LIGHT SOURCE
+	std::vector<glm::vec3> PL_pos = {
+		glm::vec3(0,-1,0), //R->L, U->D, F->B
+		//glm::vec3(0, 0, 0), //R->L, U->D, F->B
+	};
+	std::vector<glm::vec3> PL_col = {
 		glm::vec3(0.0f, 0.0f, 1.0f),
+		//glm::vec3(0.0f, 0.0f, 1.0f),
 	};
+	std::vector<float> PL_constants = { 1.0f };
+	std::vector<float> PL_linears = { 0.01f };
+	std::vector<float> PL_quadratics = { 0.0f };
 
+
+	//DIRECTIONAL LIGHT SOURCE
+	std::vector<glm::vec3> DL_directions = {
+		glm::vec3(-0.5f, 1.0f, -1.0f)  // Direction vector
+	};
+	std::vector<glm::vec3> DL_colors = {
+		glm::vec3(0.4f, 0.4f, 0.4f)    // Color (white)
+	};
+	
+	//SPOTLIGHT SOURCE
+	std::vector<glm::vec3> SL_positions = {
+	glm::vec3(0.0f, 10.0f, -275.0f)   // Position
+	};
+	std::vector<glm::vec3> SL_directions = {
+		glm::vec3(0.0f, -1.0f, 0.0f)   // Direction
+	};
+	std::vector<glm::vec3> SL_colors = {
+		glm::vec3(1.0f, 0.0f, 0.0f)    // Color (red)
+	};
+	std::vector<float> SL_cutoffs = {
+		glm::cos(glm::radians(12.5f))  // Cutoff angle (in radians)
+	};
 
 	try {
 		window->update_projection_matrix();
@@ -149,9 +175,24 @@ int App::run(void)
 			shader.setUniform("diffuse_material", { 1.0f ,1.0f ,1.0f });
 			shader.setUniform("specular_material", { 0.7f,0.7f ,0.7f });
 			shader.setUniform("specular_shininess", 1.0f);
-			shader.setUniform("num_lights", 2);
-			shader.setUniformArray("light_positions", light_positions);
-			shader.setUniformArray("light_colors", light_colors);
+			//POINT
+			shader.setUniform("num_point_lights", 1);
+			shader.setUniformArray("point_light_positions", PL_pos);
+			shader.setUniformArray("point_light_colors", PL_col);
+			shader.setUniformArray("point_light_constants", PL_constants);
+			shader.setUniformArray("point_light_linears", PL_linears);
+			shader.setUniformArray("point_light_quadratics", PL_quadratics);
+			//DIR
+			shader.setUniform("num_directional_lights", 1);
+			shader.setUniformArray("directional_light_directions", DL_directions);
+			shader.setUniformArray("directional_light_colors", DL_colors);
+			//SPOT
+			shader.setUniform("num_spot_lights", 1);
+			shader.setUniformArray("spot_light_positions", SL_positions);
+			shader.setUniformArray("spot_light_directions", SL_directions);
+			shader.setUniformArray("spot_light_colors", SL_colors);
+			shader.setUniformArray("spot_light_cutoffs", SL_cutoffs);
+
 			/*
 			uniform int num_lights;
 			uniform vec3 light_positions[MAX_LIGHTS];
@@ -167,7 +208,7 @@ int App::run(void)
 			float radius = 100.0f;
 			float speed = 2.0f;
 
-			flyingBird(scene_opaque[1], time, radius, speed);
+			flyingBird(scene_opaque[0], time, radius, speed);
 
 			for (auto& model : scene_opaque) {
 				shader.setUniform("transform", model.getTransMatrix());
@@ -223,7 +264,7 @@ void App::init_assets()
 	shader = Shader(VS_PATH, FS_PATH);
 
 	//scene_test.push_back(my_model);
-	scene_opaque.push_back(Model("./resources/obj/cube_tri_vnt.obj", "./resources/textures/box_rgb888.png", { 5.0f, 260.0f, -3.0f }));
+	scene_opaque.push_back(Model("./resources/obj/cube_tri_vnt.obj", "./resources/textures/box_rgb888.png", { 0.0f, 260.0f, 0.0f }, 30.0f));
 	scene_opaque.push_back(Model("./resources/gull/gull.obj", "./resources/gull/gull.mtl", { 0.0f, 260.0f, 0.0f }, 30.0f));
 	scene_transparent.push_back(Model("./resources/obj/bunny_tri_vnt.obj", "./resources/textures/Glass.png", { 2.0f, 240.0f, 8.0f }, 1.0f, { 1.0f, 0.0f, 0.0f, -20.0f }));
 

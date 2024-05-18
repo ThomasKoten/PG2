@@ -7,8 +7,8 @@
 #include <GL/glew.h> 
 #include <glm/ext.hpp>
 
-#define  VS_PATH std::filesystem::path("./resources/shaders/FragLT.vert")
-#define FS_PATH std::filesystem::path("./resources/shaders/FragLT.frag")
+#define  VS_PATH std::filesystem::path("./resources/shaders/FragRT.vert")
+#define FS_PATH std::filesystem::path("./resources/shaders/FragRT.frag")
 class Shader {
 public:
 	// you can add more constructors for pipeline with GS, TS etc.
@@ -41,7 +41,7 @@ public:
 	void setUniform(const std::string& name, const glm::mat4 val);
 
 	void setUniformArray(const std::string& name, const std::vector<glm::vec3>& val);
-
+	void setUniformArray(const std::string& name, const std::vector<float>& val);
 private:
 	GLuint ID{ 0 }; // default = 0, empty shader
 	std::string getShaderInfoLog(const GLuint obj);

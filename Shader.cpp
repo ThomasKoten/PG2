@@ -32,6 +32,18 @@ void Shader::setUniform(const std::string& name, const float val) {
 	glUniform1f(loc, val);
 }
 
+void Shader::setUniformArray(const std::string& name, const std::vector<float>& val) {
+	for (int i = 0; i < val.size(); ++i) {
+		std::string indexedName = name + "[" + std::to_string(i) + "]";
+		auto loc = glGetUniformLocation(ID, indexedName.c_str());
+		if (loc == -1) {
+			std::cerr << "No uniform with name: " << indexedName << '\n';
+			continue;
+		}
+		glUniform1f(loc, val[i]);
+	}
+}
+
 void Shader::setUniform(const std::string& name, const int val) {
 	auto loc = glGetUniformLocation(ID, name.c_str());
 	if (loc == -1) {
