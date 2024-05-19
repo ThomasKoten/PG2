@@ -50,8 +50,6 @@ bool loadOBJ(const char* path, std::vector < glm::vec3 >& out_vertices, std::vec
 				temp_normals.push_back(normal);
 			}
 			else if (line.substr(0, 6) == "usemtl") {
-				materialName = line.substr(7);
-				std::cout << materialName << vertexIndices.size() << std::endl;
 				MVI.push_back(vertexIndices.size());
 				MUI.push_back(uvIndices.size());
 				MNI.push_back(normalIndices.size());
@@ -96,18 +94,32 @@ bool loadOBJ(const char* path, std::vector < glm::vec3 >& out_vertices, std::vec
 					}
 
 				}
-				// f 1/1/1 2/2/2 22/23/3 21/22/4
 				else if (slashes == 8) {
-					unsigned int vertexIndex[4]{}, uvIndex[4]{}, normalIndex[4]{};
-					sscanf_s(line.c_str(), "f %d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d\n",
-						&vertexIndex[0], &uvIndex[0], &normalIndex[0],
-						&vertexIndex[1], &uvIndex[1], &normalIndex[1],
-						&vertexIndex[2], &uvIndex[2], &normalIndex[2],
-						&vertexIndex[3], &uvIndex[3], &normalIndex[3]);
+					// f 6//1 7//2 8//3 9//4 
+					if (line.find("//") != std::string::npos) {
+						unsigned int vertexIndex[4]{}, normalIndex[4]{};
+						sscanf_s(line.c_str(), "f %d//%d %d//%d %d//%d %d//%d\n",
+							&vertexIndex[0], &normalIndex[0],
+							&vertexIndex[1], &normalIndex[1],
+							&vertexIndex[2], &normalIndex[2],
+							&vertexIndex[3], &normalIndex[3]);
 
-					vertexIndices.insert(vertexIndices.end(), { vertexIndex[0], vertexIndex[1], vertexIndex[2], vertexIndex[0], vertexIndex[2],  vertexIndex[3] });
-					uvIndices.insert(uvIndices.end(), { uvIndex[0], uvIndex[1], uvIndex[2], vertexIndex[0], uvIndex[2],  uvIndex[3] });
-					normalIndices.insert(normalIndices.end(), { normalIndex[0], normalIndex[1], normalIndex[2] , normalIndex[0], normalIndex[2],  normalIndex[3] });
+						vertexIndices.insert(vertexIndices.end(), { vertexIndex[0], vertexIndex[1], vertexIndex[2], vertexIndex[0] , vertexIndex[2], vertexIndex[3] });
+						normalIndices.insert(normalIndices.end(), { normalIndex[0], normalIndex[1], normalIndex[2], normalIndex[0], normalIndex[2], normalIndex[3] });
+					}
+					else {
+
+						unsigned int vertexIndex[4]{}, uvIndex[4]{}, normalIndex[4]{};
+						sscanf_s(line.c_str(), "f %d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d\n",
+							&vertexIndex[0], &uvIndex[0], &normalIndex[0],
+							&vertexIndex[1], &uvIndex[1], &normalIndex[1],
+							&vertexIndex[2], &uvIndex[2], &normalIndex[2],
+							&vertexIndex[3], &uvIndex[3], &normalIndex[3]);
+
+						vertexIndices.insert(vertexIndices.end(), { vertexIndex[0], vertexIndex[1], vertexIndex[2], vertexIndex[0], vertexIndex[2],  vertexIndex[3] });
+						uvIndices.insert(uvIndices.end(), { uvIndex[0], uvIndex[1], uvIndex[2], uvIndex[0], uvIndex[2],  uvIndex[3] });
+						normalIndices.insert(normalIndices.end(), { normalIndex[0], normalIndex[1], normalIndex[0], normalIndex[2] , normalIndex[2],  normalIndex[3] });
+					}
 				}
 				else {
 					line_success = false;

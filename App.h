@@ -38,7 +38,11 @@ public:
 	void glew_register_callback();
 
 	static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos);
+
+	std::vector<glm::vec3>  moveLight(std::vector<glm::vec3>& position, int index, float time, float speed);
 	void flyingBird(Model& bird, float time, float radius, float speed);
+	void rollBall(Model& ball, float time, float initialX, float amplitude, float speed);
+	void jump(Model& model, float initialY, float gravity, float jumpSpeed);
 
 	void report();
 	void init_assets();
@@ -50,8 +54,6 @@ public:
 
 private:
 	Window* window;
-
-	std::vector<Model> scene_test;
 	Shader shader;
 
 	std::unordered_map<std::string, Mesh> scene;
@@ -64,6 +66,7 @@ private:
 	std::vector<Model> scene_opaque;
 	std::vector<Model> scene_transparent;
 	std::vector<Model> scene_heightmap;
-
+	float verticalVelocity = 5.0f;
+	float spinDegree = 1.0f;
 };
 

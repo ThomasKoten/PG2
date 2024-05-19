@@ -114,7 +114,7 @@ int App::run(void)
 	std::vector<glm::vec3> DL_colors = {
 		glm::vec3(0.4f, 0.4f, 0.4f)    // Color (white)
 	};
-	
+
 	//SPOTLIGHT SOURCE
 	std::vector<glm::vec3> SL_positions = {
 	glm::vec3(0.0f, 10.0f, -275.0f)   // Position
@@ -159,8 +159,8 @@ int App::run(void)
 
 			camera_movement = camera.ProcessInput(window->getWindow(), static_cast<float>(delta_t));
 			camera.Position += camera_movement;
-			float terrain_height = scene_heightmap[0].GetHeightAtPosition(camera.Position.x, camera.Position.z);
-			camera.Position.y = terrain_height + camera_height; //Zakomentovat pro "no_clip"
+			//float terrain_height = scene_heightmap[0].GetHeightAtPosition(camera.Position.x, camera.Position.z);
+			//camera.Position.y = terrain_height + camera_height; //Zakomentovat pro "no_clip"
 
 			shader.activate();
 			glm::mat4 view = glm::mat4(1.0f);
@@ -188,7 +188,7 @@ int App::run(void)
 			shader.setUniformArray("directional_light_colors", DL_colors);
 			//SPOT
 			shader.setUniform("num_spot_lights", 1);
-			shader.setUniformArray("spot_light_positions", SL_positions);
+			shader.setUniformArray("spot_light_positions", moveLight(SL_positions, 0, 1.0f, last_frame_time));
 			shader.setUniformArray("spot_light_directions", SL_directions);
 			shader.setUniformArray("spot_light_colors", SL_colors);
 			shader.setUniformArray("spot_light_cutoffs", SL_cutoffs);
@@ -204,11 +204,20 @@ int App::run(void)
 				model.Draw(shader);
 			}
 
-			double time = glfwGetTime();
 			float radius = 100.0f;
 			float speed = 2.0f;
 
-			flyingBird(scene_opaque[0], time, radius, speed);
+			float amplitude = 10.0f;
+			float centerX = 30.0f;
+
+			float jumpSpeed = 0.008;
+			float gravity = 2.8f;
+
+
+			//flyingBird(scene_opaque[0], last_frame_time, radius, speed);
+			rollBall(scene_opaque[1], last_frame_time, centerX, amplitude, speed);
+			jump(scene_transparent[0], 240.0f, gravity, jumpSpeed);
+
 
 			for (auto& model : scene_opaque) {
 				shader.setUniform("transform", model.getTransMatrix());
@@ -263,9 +272,8 @@ void App::init_assets()
 	// load models, load textures, load shaders, initialize level, etc...
 	shader = Shader(VS_PATH, FS_PATH);
 
-	//scene_test.push_back(my_model);
-	scene_opaque.push_back(Model("./resources/obj/cube_tri_vnt.obj", "./resources/textures/box_rgb888.png", { 0.0f, 260.0f, 0.0f }, 30.0f));
-	scene_opaque.push_back(Model("./resources/gull/gull.obj", "./resources/gull/gull.mtl", { 0.0f, 260.0f, 0.0f }, 30.0f));
+	scene_opaque.push_back(Model("./resources/obj/condor.obj", "./resources/materials/condor.mtl", { 0.0f, 260.0f, 0.0f }, 30.0f));
+	scene_opaque.push_back(Model("./resources/obj/soccer_ball.obj", "./resources/materials/soccer_ball.mtl", { 20.0f, 248.0f, 30.0f }, 0.2f, { 0.0f, 0.0f, 1.0f, 0.0f }));
 	scene_transparent.push_back(Model("./resources/obj/bunny_tri_vnt.obj", "./resources/textures/Glass.png", { 2.0f, 240.0f, 8.0f }, 1.0f, { 1.0f, 0.0f, 0.0f, -20.0f }));
 
 	// == HEIGHTMAP ==
@@ -313,4 +321,42 @@ void App::flyingBird(Model& bird, float time, float radius, float speed) {
 	bird.position = glm::vec3(x, bird.position.y, z);
 
 }
+
+void App::rollBall(Model& ball, float time, float centerX, float amplitude, float speed) {
+	float x = amplitude * sin(speed * time) + centerX;
+
+	float distanceTraveled = centerX - x;
+	float rotationAngle = distanceTraveled * 360.0f;
+
+	// Update ball position
+	ball.position.x = x;
+
+	// Update ball rotation
+	ball.rotation.w = glm::radians(rotationAngle);
+}
+
+void App::jump(Model& model, float initialY, float gravity, float jumpSpeed) {
+	// Update vertical position
+	model.position.y += verticalVelocity * jumpSpeed;
+	spinDegree += 0.5;
+	model.rotation = { 0.0f, 1.0f, 0.0f, spinDegree };
+	if (model.position.y >= initialY) {
+		verticalVelocity -= gravity * jumpSpeed; // Apply gravity
+	}
+	else {
+		verticalVelocity = 10.0;
+	}
+}
+
+std::vector<glm::vec3>  App::moveLight(std::vector<glm::vec3>& position, int index, float time, float speed) {
+	float yOffset = 50.0f * sin(speed * time);
+
+	// Update the light position
+	position[0].y = 10 + yOffset;
+	position[0].z += 0.01;
+
+	return position;
+}
+
+
 
