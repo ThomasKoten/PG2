@@ -2,6 +2,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 #include <GL/glew.h>
 #include <glm/ext.hpp>
@@ -21,7 +22,6 @@ Shader::Shader(const std::filesystem::path& VS_file, const std::filesystem::path
 	ID = link_shader(shader_ids);
 
 }
-// TODO: load, compile, and link shader
 
 void Shader::setUniform(const std::string& name, const float val) {
 	auto loc = glGetUniformLocation(ID, name.c_str());

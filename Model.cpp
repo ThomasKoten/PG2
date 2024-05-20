@@ -17,7 +17,6 @@ Model::Model(const std::filesystem::path& path_obj, const std::filesystem::path&
 		Mesh mesh = Mesh(GL_TRIANGLES, mesh_vertexes, mesh_indices, texture_id);
 		meshes.push_back(mesh);
 	}
-	// TODO: call LoadOBJFile, LoadMTLFile, process data, create mesh and set its properties 
 }
 
 void Model::Draw(Shader& shader) {
@@ -159,7 +158,6 @@ void Model::HeightMap_Load(const std::filesystem::path& hm_file)
 			mesh_vertexes.emplace_back(Vertex{ p1,normal, tc1 });
 
 			// place indices
-			//mesh_indices.emplace_back(0, 1, 2, 0, 2, 3);
 
 			indices_counter += 4;
 			mesh_indices.emplace_back(indices_counter - 4);
@@ -190,7 +188,7 @@ glm::vec2 Model::getSubtexByHeight(float height)
 	if (height > 0.9)
 		return getSubtexST(2, 4); //snow
 	else if (height > 0.8)
-		return getSubtexST(2, 3); //ice
+		return getSubtexST(2, 3); //diamond
 	else if (height > 0.5)
 		return getSubtexST(10, 6); //rock
 	else if (height > 0.3)

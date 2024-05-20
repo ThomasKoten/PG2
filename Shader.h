@@ -1,8 +1,6 @@
 #pragma once
 #include <string>
 #include <filesystem>
-#include <iostream>
-#include <fstream>
 
 #include <GL/glew.h> 
 #include <glm/ext.hpp>
@@ -11,7 +9,6 @@
 #define FS_PATH std::filesystem::path("./resources/shaders/FragRT.frag")
 class Shader {
 public:
-	// you can add more constructors for pipeline with GS, TS etc.
 	Shader(void) = default; //does nothing
 	Shader(const std::filesystem::path& VS_file, const std::filesystem::path& FS_file);
 
@@ -27,9 +24,6 @@ public:
 		return ID;
 	}
 
-	// set uniform according to name 
-	// https://docs.gl/gl4/glUniform
-	
 	void setUniform(const std::string& name, const int val);
 
 	void setUniform(const std::string& name, const float val);

@@ -61,8 +61,8 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 	}
 }
 void Window::handle_key_event(int key, int action) {
-	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+	monitor = glfwGetPrimaryMonitor();
+	mode = glfwGetVideoMode(monitor);
 
 	if ((action == GLFW_PRESS) || (action == GLFW_REPEAT))
 	{
@@ -137,6 +137,25 @@ void Window::set_vsync(bool state) {
 	std::cout << "Vsync Off" << std::endl;
 }
 
+void Window::set_fullscreen(bool fullscreen) {
+	this->fullscreen = fullscreen;
+
+	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+	if (fullscreen) {
+		monitor = glfwGetPrimaryMonitor();
+		mode = glfwGetVideoMode(monitor);
+		glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, GLFW_DONT_CARE); //GLFW_DONT_CARE seems to be the issue
+		std::cout << "Fullscreen" << std::endl;
+	}
+	else {
+		const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+		glfwSetWindowMonitor(window, nullptr, 150, 150, mode->width / 2, mode->height / 2, GLFW_DONT_CARE);
+		std::cout << "Windowed" << std::endl;
+	}
+}
+
 void Window::mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
 	if ((action == GLFW_PRESS) || (action == GLFW_REPEAT))
 	{
@@ -156,50 +175,4 @@ void Window::mouse_button_callback(GLFWwindow* window, int button, int action, i
 
 void Window::error_callback(int error, const char* description) {
 	std::cerr << "Error: " << description << std::endl;
-}
-
-bool Window::isVSynced() const
-{
-	return VSync;
-}
-
-bool Window::isFullscreen() const {
-	return fullscreen;
-}
-
-int Window::getWidth() {
-	return width;
-}
-
-int Window::getHeight() {
-	return height;
-}
-
-GLFWmonitor* Window::getMonitor() {
-	return monitor;
-}
-
-const GLFWvidmode* Window::getMode() {
-	return mode;
-}
-
-GLFWwindow* Window::getWindow() const
-{
-	return window;
-}
-
-void Window::set_fullscreen(bool fullscreen) {
-	this->fullscreen = fullscreen;
-
-	if (fullscreen) {
-		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-		glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, GLFW_DONT_CARE); //GLFW_DONT_CARE seems to be the issue
-		std::cout << "Fullscreen" << std::endl;
-	}
-	else {
-		const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-		glfwSetWindowMonitor(window, nullptr, 150, 150, mode->width / 2, mode->height / 2, GLFW_DONT_CARE);
-		std::cout << "Windowed" << std::endl;
-	}
 }

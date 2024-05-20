@@ -1,5 +1,7 @@
 #include "Texture.h"
 
+#define MAX_LINE_SIZE 255
+
 GLuint textureInit(const char* filepath)
 {
 	cv::Mat image = cv::imread(filepath, cv::IMREAD_UNCHANGED);
@@ -60,15 +62,11 @@ GLuint tex_gen(cv::Mat& image)
 
 		std::cout << "COMPRESSION supported, tot. available formats: " << num_compressed_format << std::endl;
 
-		// try to load compressed texture
-		//glHint(GL_TEXTURE_COMPRESSION_HINT, GL_FASTEST);
 		glHint(GL_TEXTURE_COMPRESSION_HINT, GL_NICEST);
 
 		glTexImage2D(GL_TEXTURE_2D, 0, img_internalformat, image.cols, image.rows, 0, img_format, GL_UNSIGNED_BYTE, image.data);
 
-		// Is it now really compressed? Did we succeed?
 		glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_COMPRESSED, &compressed);
-		// if the compression has been successful
 		if (compressed == GL_TRUE)
 		{
 			glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &internalformat);
@@ -88,17 +86,6 @@ GLuint tex_gen(cv::Mat& image)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-
-	// Texture filters - pick one
-
-	// nearest neighbor - ugly & fast 
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);  
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-	// bilinear - nicer & slower
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
 	// MIPMAP filtering + automatic MIPMAP generation - nicest, needs more memory. Notice: MIPMAP is only for image minifying.
 	glGenerateMipmap(GL_TEXTURE_2D);  //Generate mipmaps now.
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // bilinear magnifying
@@ -114,9 +101,9 @@ GLuint createSolidColorTexture(const glm::vec3& color) {
 
 	// Create a 1x1 pixel texture with the specified color
 	unsigned char data[3] = {
-		static_cast<unsigned char>(color.r * 255),
-		static_cast<unsigned char>(color.g * 255),
-		static_cast<unsigned char>(color.b * 255)
+		static_cast<unsigned char>(color.r * MAX_LINE_SIZE),
+		static_cast<unsigned char>(color.g * MAX_LINE_SIZE),
+		static_cast<unsigned char>(color.b * MAX_LINE_SIZE)
 	};
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, data);

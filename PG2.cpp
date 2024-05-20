@@ -1,5 +1,5 @@
 ﻿// PG2.cpp : Tento soubor obsahuje funkci main. Provádění programu se tam zahajuje a ukončuje.
-//
+
 #pragma once
 #include <iostream>
 #include <chrono>
@@ -19,18 +19,18 @@ App app;
 
 void getFPS(GLFWwindow* window) {
 	double previousTime = glfwGetTime();
-	int nbFrames = 0;
+	int frameCount = 0;
 	double elapsedTime;
 
 	while (!glfwWindowShouldClose(window)) {
 		double currentTime = glfwGetTime();
-		nbFrames++;
+		frameCount++;
 		elapsedTime = currentTime - previousTime;
 		if (elapsedTime >= 1.0) { // If last prinf() was more than 1 sec ago
 			previousTime = currentTime;
 			// printf and reset timer
-			std::cout << (double(nbFrames) / elapsedTime) << std::endl;
-			nbFrames = 0;
+			std::cout << (double(frameCount) / elapsedTime) << std::endl;
+			frameCount = 0;
 		}
 	}
 }
@@ -38,7 +38,14 @@ void getFPS(GLFWwindow* window) {
 
 int main()
 {
-	if (app.init())
+	// Initialize the application
+	if (app.init()) {
 		app.report();
-	return app.run();
+		// Run the application
+		return app.run();
+	}
+	else {
+		std::cerr << "Failed to initialize the application." << std::endl;
+		return -1;
+	}
 }

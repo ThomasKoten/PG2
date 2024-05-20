@@ -1,9 +1,5 @@
-﻿#pragma once //Light a material definovat v Shader i App
-#include "App.h"
-#include "Model.h"
-#include "Shader.h"
-#include <opencv2\opencv.hpp>
-#include <cmath>
+﻿#include "App.h"
+#include <filesystem>
 
 void getString(const std::string name, GLenum symb_const) {
 	const char* mystring = (const char*)glGetString(symb_const);
@@ -24,9 +20,8 @@ double App::last_cursor_ypos{};
 App::App()
 {
 	// default constructor
-	// nothing to do here (so far...)
 	std::cout << "Constructed...\n";
-	window = new Window(800, 600, "OpenGL Window");
+	window = new Window(800, 600, "OpenGL Window", false, false);
 }
 
 bool App::init()
@@ -35,15 +30,9 @@ bool App::init()
 		glfwWindowHint(GLFW_SAMPLES, 1);
 		glfwSetCursorPosCallback(window->getWindow(), cursor_pos_callback);
 
-		//glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-		//glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-		//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
-
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-		//glfwSwapInterval(1);
 
 
 		// init glew
@@ -133,13 +122,14 @@ int App::run(void)
 		window->update_projection_matrix();
 		glViewport(0, 0, window->getWidth(), window->getHeight());
 
-		camera.Position = glm::vec3(0, 270, 0);
+		camera.Position = glm::vec3(0, 270, 30);
 		double last_frame_time = glfwGetTime();
 		glm::vec3 camera_movement{};
 
 		glm::vec4 green = { 0.0f, 0.5f, 0.0f, 1.0f };
 		while (!glfwWindowShouldClose(window->getWindow()))
 		{
+			glfwPollEvents();
 			double currentTime = glfwGetTime();
 			nbFrames++;
 			elapsedTime = currentTime - previousTime;
@@ -159,15 +149,12 @@ int App::run(void)
 
 			camera_movement = camera.ProcessInput(window->getWindow(), static_cast<float>(delta_t));
 			camera.Position += camera_movement;
-			//float terrain_height = scene_heightmap[0].GetHeightAtPosition(camera.Position.x, camera.Position.z);
-			//camera.Position.y = terrain_height + camera_height; //Zakomentovat pro "no_clip"
+			float terrain_height = scene_heightmap[0].GetHeightAtPosition(camera.Position.x, camera.Position.z);
+			camera.Position.y = terrain_height + camera_height; //Zakomentovat pro "no_clip"
 
 			shader.activate();
 			glm::mat4 view = glm::mat4(1.0f);
 			view = camera.GetViewMatrix();
-
-			//glm::mat4 projection = glm::mat4(1.0f);
-			//projection = glm::perspective(glm::radians(60.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
 
 			shader.setUniform("projection", window->getProjection());
 			shader.setUniform("view", view);
@@ -193,12 +180,6 @@ int App::run(void)
 			shader.setUniformArray("spot_light_colors", SL_colors);
 			shader.setUniformArray("spot_light_cutoffs", SL_cutoffs);
 
-			/*
-			uniform int num_lights;
-			uniform vec3 light_positions[MAX_LIGHTS];
-			uniform vec3 light_colors[MAX_LIGHTS];
-			*/
-
 			for (auto& model : scene_heightmap) {
 				shader.setUniform("transform", model.getTransMatrix());
 				model.Draw(shader);
@@ -214,7 +195,7 @@ int App::run(void)
 			float gravity = 2.8f;
 
 
-			//flyingBird(scene_opaque[0], last_frame_time, radius, speed);
+			flyingBird(scene_opaque[0], last_frame_time, radius, speed);
 			rollBall(scene_opaque[1], last_frame_time, centerX, amplitude, speed);
 			jump(scene_transparent[0], 240.0f, gravity, jumpSpeed);
 
@@ -233,7 +214,7 @@ int App::run(void)
 			shader.setUniform("diffuse_material", rgb_white);
 			shader.setUniform("specular_material", rgb_white);
 			shader.setUniform("specular_shininess", 1.0f);
-			// TODO: sort by distance from camera, from far to near
+
 			for (auto& model : scene_transparent) {
 				shader.setUniform("transform", model.getTransMatrix());
 				model.Draw(shader);
@@ -245,9 +226,6 @@ int App::run(void)
 
 			// Swap front and back buffers
 			glfwSwapBuffers(window->getWindow());
-
-			// Poll for and process events
-			glfwPollEvents();
 		}
 	}
 	catch (std::exception const& e) {
@@ -265,22 +243,19 @@ App::~App()
 	std::cout << "Bye...\n";
 }
 
-
-
 void App::init_assets()
 {
 	// load models, load textures, load shaders, initialize level, etc...
 	shader = Shader(VS_PATH, FS_PATH);
 
-	scene_opaque.push_back(Model("./resources/obj/condor.obj", "./resources/materials/condor.mtl", { 0.0f, 260.0f, 0.0f }, 30.0f));
-	scene_opaque.push_back(Model("./resources/obj/soccer_ball.obj", "./resources/materials/soccer_ball.mtl", { 20.0f, 248.0f, 30.0f }, 0.2f, { 0.0f, 0.0f, 1.0f, 0.0f }));
-	scene_transparent.push_back(Model("./resources/obj/bunny_tri_vnt.obj", "./resources/textures/Glass.png", { 2.0f, 240.0f, 8.0f }, 1.0f, { 1.0f, 0.0f, 0.0f, -20.0f }));
+	scene_opaque.push_back(Model("./resources/objects/condor.obj", "./resources/materials/condor.mtl", { 0.0f, 260.0f, 0.0f }, 30.0f));
+	scene_opaque.push_back(Model("./resources/objects/soccer_ball.obj", "./resources/materials/soccer_ball.mtl", { 20.0f, 248.0f, 30.0f }, 0.2f, { 0.0f, 0.0f, 1.0f, 0.0f }));
+	scene_transparent.push_back(Model("./resources/objects/bunny_tri_vnt.obj", "./resources/textures/Glass.png", { 2.0f, 240.0f, 8.0f }, 1.0f, { 1.0f, 0.0f, 0.0f, -20.0f }));
 
 	// == HEIGHTMAP ==
 	std::filesystem::path heightspath("./resources/textures/heights.png");
 	std::filesystem::path texturepath("./resources/textures/tex_256.png");
-	auto model = Model(heightspath, texturepath, { 0.0f,0.0f, 0.0f }, 1.0f, { 0.0f, 1.0f, 0.0f, 0.0f }, true);
-	scene_heightmap.push_back(model);
+	scene_heightmap.push_back(Model(heightspath, texturepath, { 0.0f, 0.0f, 0.0f }, 1.0f, { 0.0f, 1.0f, 0.0f, 0.0f }, true));
 }
 
 void App::report() {
@@ -315,10 +290,9 @@ void App::flyingBird(Model& bird, float time, float radius, float speed) {
 	float angle = atan2(direction.z, direction.x);
 	float angle_deg = glm::degrees(angle);
 
-	// Update model orientation
-	bird.rotation.w = angle_deg;
-	//Update model position
-	bird.position = glm::vec3(x, bird.position.y, z);
+
+	bird.rotation.w = angle_deg; // Update model orientation
+	bird.position = glm::vec3(x, bird.position.y, z); //Update model position
 
 }
 
@@ -328,16 +302,13 @@ void App::rollBall(Model& ball, float time, float centerX, float amplitude, floa
 	float distanceTraveled = centerX - x;
 	float rotationAngle = distanceTraveled * 360.0f;
 
-	// Update ball position
-	ball.position.x = x;
 
-	// Update ball rotation
-	ball.rotation.w = glm::radians(rotationAngle);
+	ball.position.x = x; // Update ball position
+	ball.rotation.w = glm::radians(rotationAngle); // Update ball rotation
 }
 
 void App::jump(Model& model, float initialY, float gravity, float jumpSpeed) {
-	// Update vertical position
-	model.position.y += verticalVelocity * jumpSpeed;
+	model.position.y += verticalVelocity * jumpSpeed; // Update vertical position
 	spinDegree += 0.5;
 	model.rotation = { 0.0f, 1.0f, 0.0f, spinDegree };
 	if (model.position.y >= initialY) {

@@ -1,9 +1,9 @@
 #pragma once
 #include <iostream>
 
-#include <GL/glew.h> 
-#include <GL/wglew.h> 
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
+
 
 #include "gl_err_callback.h"
 

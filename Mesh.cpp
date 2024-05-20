@@ -46,23 +46,13 @@ Mesh::Mesh(GLenum draw_mode, std::vector<Vertex>& vertices, std::vector<GLuint>&
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	// USE
-	my_shader.activate();
-	// TODO: create and initialize VAO, VBO, EBO and parameters
 }
 
 void Mesh::Draw(Shader& shader) {
-	// TODO: set uniform variables: color
-	//glm::vec3 color= { 1.0f, 0.0f, 0.0f};
-	//shader.setUniform("color", color);
+
 	if (Tex_ID > 0) {
-		//set texture id etc...
 		glActiveTexture(GL_TEXTURE0);
-		//if (texture_id > 0) {
 		glBindTexture(GL_TEXTURE_2D, Tex_ID);
-		//    glActiveTexture(GL_TEXTURE0);
-		//shader.setUniform("uTexture", 0);
-		//    glBindTexture(GL_TEXTURE_2D, texture_id);
 	}
 	shader.activate();
 	glBindVertexArray(VAO);

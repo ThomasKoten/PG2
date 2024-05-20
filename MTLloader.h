@@ -15,7 +15,6 @@ struct Material {
 class MTLloader
 {
 public:
-	//MTLloader() = default;
 	std::vector<Material> loadMTL(const std::string& path);
 };
 

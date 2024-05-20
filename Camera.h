@@ -1,12 +1,8 @@
 #pragma once
 
-#include <iostream>
-
-#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_transform.hpp>
-
 class Camera
 {
 public:
@@ -19,7 +15,6 @@ public:
 
 	GLfloat Yaw = -90.0f;
 	GLfloat Pitch = 0.0f;;
-	GLfloat Roll = 0.0f;
 
 	// Camera options
 	GLfloat MovementSpeed = 10.0f;

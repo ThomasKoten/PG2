@@ -8,8 +8,6 @@
 #include "StringUtils.h"
 
 
-#define MAX_LINE_SIZE 255
-
 bool loadOBJ(const char* path, std::vector < glm::vec3 >& out_vertices, std::vector < glm::vec2 >& out_uvs, std::vector < glm::vec3 >& out_normals, std::vector<Material>& materials)
 {
 	auto file_lines = FillFileLines(path);
@@ -19,7 +17,7 @@ bool loadOBJ(const char* path, std::vector < glm::vec3 >& out_vertices, std::vec
 	std::vector< glm::vec2 > temp_uvs;
 	std::vector< glm::vec3 > temp_normals;
 
-	std::string first_two_chars, first_three_chars, materialName;
+	std::string first_two_chars, first_three_chars;
 	bool line_success;
 
 	out_vertices.clear();
@@ -162,8 +160,6 @@ bool loadOBJ(const char* path, std::vector < glm::vec3 >& out_vertices, std::vec
 	}
 
 	// unroll from indirect to direct vertex specification
-	// sometimes not necessary, definitely not optimal
-
 	for (unsigned int u = 0; u < vertexIndices.size(); u++) {
 		unsigned int vertexIndex = vertexIndices[u];
 		glm::vec3 vertex = temp_vertices[vertexIndex - 1];
