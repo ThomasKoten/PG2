@@ -8,7 +8,7 @@ Extract opencv-4.6.0-vc14_vc15.exe to C:\
 Add user specific variable:
 **OPENCV_DIR=C:\opencv\build**
 
-Change default path
+Add default path
 **PATH=%PATH%;%OPENCV_DIR%\x64\vc15\bin**
 
 ## Instalace
