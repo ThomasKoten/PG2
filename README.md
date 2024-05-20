@@ -1,4 +1,5 @@
 # PG2
+**Autoři projektu:** Koten Tomáš, Knespl Daniel
 ## Závislosti
 WINDOWS: 
 Download from https://opencv.org/releases/ 
